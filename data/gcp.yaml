@@ -1,0 +1,55 @@
+regions:
+- cloud_provider: GCP
+  region: 中国 (香港)
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  - 自运营
+  latitude: 22.3193
+  longitude: 114.1694
+- cloud_provider: GCP
+  region: 印尼 (雅加达)
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  - 自运营
+  latitude: -6.2088
+  longitude: 106.8456
+- cloud_provider: GCP
+  region: 新加坡
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  - 自运营
+  latitude: 1.3521
+  longitude: 103.8198
+- cloud_provider: GCP
+  region: 日本 (东京)
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  - 自运营
+  latitude: 35.6762
+  longitude: 139.6503
+- cloud_provider: GCP
+  region: 美国 (俄勒冈)
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  - 自运营
+  latitude: 45.5152
+  longitude: -122.6784
+- cloud_provider: GCP
+  region: 美国 (弗吉尼亚)
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  - 自运营
+  latitude: 38.9072
+  longitude: -77.0369

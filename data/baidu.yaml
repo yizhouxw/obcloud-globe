@@ -1,0 +1,25 @@
+regions:
+- cloud_provider: 百度云
+  region: 保定
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 官网渠道
+  latitude: 38.851
+  longitude: 115.49
+- cloud_provider: 百度云
+  region: 北京
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 官网渠道
+  latitude: 39.9042
+  longitude: 116.4074
+- cloud_provider: 百度云
+  region: 武汉
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 官网渠道
+  latitude: 30.5928
+  longitude: 114.3055

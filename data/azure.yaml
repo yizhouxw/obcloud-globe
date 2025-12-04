@@ -1,0 +1,33 @@
+regions:
+- cloud_provider: Azure
+  region: 新加坡
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  latitude: 1.3521
+  longitude: 103.8198
+- cloud_provider: Azure
+  region: 爱尔兰
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  latitude: 53.3498
+  longitude: -6.2603
+- cloud_provider: Azure
+  region: 美国 (弗吉尼亚)
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  latitude: 38.9072
+  longitude: -77.0369
+- cloud_provider: Azure
+  region: 马来西亚 （吉隆坡）
+  launch_date: 待补充
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  latitude: 3.139
+  longitude: 101.6869
