@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'app/obcloud-globe/**'
+      - '**'
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -52,7 +52,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './app/obcloud-globe'
+          path: './'
 
       - name: Deploy to GitHub Pages
         id: deployment
