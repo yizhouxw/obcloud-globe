@@ -390,6 +390,7 @@ function initGlobe() {
     tryLoadTexture(0);
     
     globeMesh = new THREE.Mesh(geometry, material);
+
     globeScene.add(globeMesh);
 
     // Lighting
@@ -400,6 +401,15 @@ function initGlobe() {
     directionalLight.position.set(1, 1, 1);
     globeScene.add(directionalLight);
 
+    // Auto-rotation control
+    let autoRotate = true;  // Enable auto-rotation by default
+    let lastAutoRotateTime = Date.now();
+    
+    // Function to stop auto-rotation
+    function stopAutoRotate() {
+        autoRotate = false;
+    }
+
     // Controls (mouse interaction)
     let isDragging = false;
     let previousMousePosition = { x: 0, y: 0 };
@@ -408,10 +418,12 @@ function initGlobe() {
     globeRenderer.domElement.addEventListener('mousedown', (e) => {
         isDragging = true;
         mouseDownPosition = { x: e.clientX, y: e.clientY };
+        stopAutoRotate();  // Stop auto-rotation on mouse down
     });
 
     globeRenderer.domElement.addEventListener('mousemove', (e) => {
         if (isDragging) {
+            stopAutoRotate();  // Stop auto-rotation when dragging
             const deltaX = e.clientX - previousMousePosition.x;
             const deltaY = e.clientY - previousMousePosition.y;
             
@@ -449,6 +461,8 @@ function initGlobe() {
     });
 
     globeRenderer.domElement.addEventListener('mouseup', (e) => {
+        stopAutoRotate();  // Stop auto-rotation on any mouse interaction
+        
         // Check if it was a click (not a drag)
         const dragDistance = Math.sqrt(
             Math.pow(e.clientX - mouseDownPosition.x, 2) + 
@@ -543,13 +557,26 @@ function initGlobe() {
 
     globeRenderer.domElement.addEventListener('wheel', (e) => {
         e.preventDefault();
+        stopAutoRotate();  // Stop auto-rotation on wheel zoom
         globeCamera.position.z += e.deltaY * 0.5;
         globeCamera.position.z = Math.max(150, Math.min(500, globeCamera.position.z));
     });
 
-    // Render loop (no auto rotation, no marker animations)
+    // Render loop with auto-rotation
     function animate() {
         requestAnimationFrame(animate);
+        
+        // Auto-rotation: 10 seconds per full rotation (360 degrees)
+        if (autoRotate && globeMesh) {
+            const currentTime = Date.now();
+            const deltaTime = (currentTime - lastAutoRotateTime) / 1000; // Convert to seconds
+            lastAutoRotateTime = currentTime;
+            
+            // Rotate 360 degrees in 10 seconds = 36 degrees per second = 0.628 radians per second
+            const rotationSpeed = (2 * Math.PI) / 10; // radians per second
+            globeMesh.rotation.y += rotationSpeed * deltaTime;
+        }
+        
         // Update marker scales based on camera distance to keep them fixed size
         const cameraDistance = globeCamera.position.z;
         const baseDistance = 300; // Base camera distance
