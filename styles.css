@@ -203,27 +203,69 @@ main {
 /* Table View */
 #table-view {
     background: #fff;
-    overflow: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .table-container {
     padding: 2rem;
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
-table {
+.table-header-wrapper {
+    flex-shrink: 0;
+    overflow: hidden;
+    background: white;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.table-body-wrapper {
+    flex: 1;
+    overflow: auto;
+    background: white;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.table-header,
+.table-body {
     width: 100%;
     border-collapse: collapse;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
+    table-layout: fixed;
 }
 
-thead {
+.table-header {
+    background: white;
+}
+
+.table-body {
+    background: white;
+}
+
+.table-header thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.table-header thead tr {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.table-header th {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 th {
@@ -235,21 +277,27 @@ th {
     letter-spacing: 0.5px;
 }
 
-tbody tr {
+.table-body tbody tr {
     border-bottom: 1px solid #eee;
     transition: background 0.2s ease;
+    background: white;
 }
 
-tbody tr:hover {
+.table-body td {
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+.table-body tbody tr:hover {
     background: #f8f9fa;
 }
 
-tbody tr.selected {
+.table-body tbody tr.selected {
     background: #e3f2fd;
     border-left: 4px solid #667eea;
 }
 
-tbody tr.selected:hover {
+.table-body tbody tr.selected:hover {
     background: #e3f2fd;
 }
 

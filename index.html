@@ -53,6 +53,9 @@
                     </button>
                 </div>
                 <div class="filters">
+                    <select id="siteFilter" class="filter-select">
+                        <option value="">所有站点</option>
+                    </select>
                     <select id="cloudProviderFilter" class="filter-select">
                         <option value="">所有云厂商</option>
                     </select>
@@ -88,20 +91,27 @@
                 <!-- Table View -->
                 <div id="table-view" class="view-container">
                     <div class="table-container">
-                        <table id="regions-table">
-                            <thead>
-                                <tr>
-                                    <th>云厂商</th>
-                                    <th>地域</th>
-                                    <th>地域代码</th>
-                                    <th>可用区数量</th>
-                                    <th>开服日期</th>
-                                    <th>支持的渠道</th>
-                                </tr>
-                            </thead>
-                            <tbody id="regions-table-body">
-                            </tbody>
-                        </table>
+                        <div class="table-header-wrapper">
+                            <table id="regions-table-header" class="table-header">
+                                <thead>
+                                    <tr>
+                                        <th>云厂商</th>
+                                        <th>地域</th>
+                                        <th>地域代码</th>
+                                        <th>可用区数量</th>
+                                        <th>开服日期</th>
+                                        <th>支持的渠道</th>
+                                        <th>支持的站点</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div class="table-body-wrapper">
+                            <table id="regions-table" class="table-body">
+                                <tbody id="regions-table-body">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

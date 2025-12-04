@@ -159,6 +159,7 @@ function setupEventListeners() {
     });
 
     // Filter selects and input
+    document.getElementById('siteFilter').addEventListener('change', applyFilters);
     document.getElementById('cloudProviderFilter').addEventListener('change', applyFilters);
     document.getElementById('channelFilter').addEventListener('change', applyFilters);
     document.getElementById('regionFilter').addEventListener('input', applyFilters);
@@ -212,6 +213,15 @@ function setupEventListeners() {
     }
 }
 
+// Helper function to normalize obcloud_site (can be string or array)
+function getObcloudSites(region) {
+    if (!region.obcloud_site) return [];
+    if (Array.isArray(region.obcloud_site)) {
+        return region.obcloud_site;
+    }
+    return [region.obcloud_site];
+}
+
 // Initialize filter dropdowns
 function initializeFilters() {
     const cloudProviders = [...new Set(regionsData.map(r => r.cloud_provider))].sort();
@@ -225,6 +235,23 @@ function initializeFilters() {
         }
     });
     const channels = [...allChannels].sort();
+    
+    // Get all unique sites from all regions
+    const allSites = new Set();
+    regionsData.forEach(region => {
+        const sites = getObcloudSites(region);
+        sites.forEach(site => allSites.add(site));
+    });
+    const sites = [...allSites].sort();
+
+    // Initialize site filter
+    const siteSelect = document.getElementById('siteFilter');
+    sites.forEach(site => {
+        const option = document.createElement('option');
+        option.value = site;
+        option.textContent = site;
+        siteSelect.appendChild(option);
+    });
 
     // Initialize cloud provider filter
     const cloudProviderSelect = document.getElementById('cloudProviderFilter');
@@ -255,11 +282,16 @@ function initializeFilters() {
 
 // Apply filters
 function applyFilters() {
+    const siteFilter = document.getElementById('siteFilter').value;
     const cloudProviderFilter = document.getElementById('cloudProviderFilter').value;
     const channelFilter = document.getElementById('channelFilter').value;
     const regionFilter = document.getElementById('regionFilter').value.trim();
 
     filteredRegions = regionsData.filter(region => {
+        // Match site (check if region has the selected site)
+        const regionSites = getObcloudSites(region);
+        const matchSite = !siteFilter || regionSites.includes(siteFilter);
+        
         // Match cloud provider
         const matchProvider = !cloudProviderFilter || region.cloud_provider === cloudProviderFilter;
         
@@ -271,7 +303,7 @@ function applyFilters() {
         const matchRegion = !regionFilter || 
             region.region.toLowerCase().includes(regionFilter.toLowerCase());
         
-        return matchProvider && matchChannel && matchRegion;
+        return matchSite && matchProvider && matchChannel && matchRegion;
     });
 
     updateCurrentView();
@@ -633,6 +665,13 @@ function initGlobe() {
         globeCamera.updateProjectionMatrix();
         globeRenderer.setSize(width, height);
     });
+    
+    // Sync table column widths on window resize
+    window.addEventListener('resize', () => {
+        if (currentViewMode === 'table') {
+            setTimeout(syncTableColumnWidths, 100);
+        }
+    });
 
     updateGlobe();
 }
@@ -952,13 +991,48 @@ function createPopupContent(region) {
     `;
 }
 
+// Sync column widths between header and body tables
+function syncTableColumnWidths() {
+    const headerTable = document.getElementById('regions-table-header');
+    const bodyTable = document.getElementById('regions-table');
+    
+    if (!headerTable || !bodyTable) return;
+    
+    const headerCells = headerTable.querySelectorAll('thead th');
+    if (headerCells.length === 0) return;
+    
+    // Get all body rows
+    const bodyRows = bodyTable.querySelectorAll('tbody tr');
+    if (bodyRows.length === 0) return;
+    
+    // Calculate and set widths for each column
+    headerCells.forEach((headerCell, index) => {
+        const width = headerCell.offsetWidth;
+        headerCell.style.width = width + 'px';
+        headerCell.style.minWidth = width + 'px';
+        headerCell.style.maxWidth = width + 'px';
+        
+        // Apply to all cells in this column
+        bodyRows.forEach(row => {
+            const cell = row.querySelector(`td:nth-child(${index + 1})`);
+            if (cell) {
+                cell.style.width = width + 'px';
+                cell.style.minWidth = width + 'px';
+                cell.style.maxWidth = width + 'px';
+            }
+        });
+    });
+}
+
 // Update Table view
 function updateTable() {
     const tbody = document.getElementById('regions-table-body');
     tbody.innerHTML = '';
 
     if (filteredRegions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #999;">没有找到匹配的地域</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #999;">没有找到匹配的地域</td></tr>';
+        // Sync widths even for empty table
+        setTimeout(syncTableColumnWidths, 0);
         return;
     }
 
@@ -983,6 +1057,11 @@ function updateTable() {
         const channelsHtml = region.channels.map(ch => 
             `<span class="channel-tag">${ch}</span>`
         ).join('');
+        
+        const sites = getObcloudSites(region);
+        const sitesHtml = sites.length > 0 
+            ? sites.map(site => `<span class="channel-tag">${site}</span>`).join('')
+            : '-';
 
         row.innerHTML = `
             <td>${region.cloud_provider}</td>
@@ -991,10 +1070,14 @@ function updateTable() {
             <td>${region.availability_zones}</td>
             <td>${region.launch_date}</td>
             <td><div class="channels">${channelsHtml}</div></td>
+            <td>${sites.length > 0 ? `<div class="channels">${sitesHtml}</div>` : '-'}</td>
         `;
 
         tbody.appendChild(row);
     });
+    
+    // Sync column widths after table is updated
+    setTimeout(syncTableColumnWidths, 0);
 }
 
 // Reset sidebar to empty state
@@ -1057,6 +1140,11 @@ function showRegionInfo(region) {
     const channelsHtml = region.channels.map(ch => 
         `<span class="channel-tag">${ch}</span>`
     ).join('');
+    
+    const sites = getObcloudSites(region);
+    const sitesHtml = sites.length > 0 
+        ? sites.map(site => `<span class="channel-tag">${site}</span>`).join('')
+        : '-';
 
     content.innerHTML = `
         <h3 style="color: ${providerColorHex};">${region.region}</h3>
@@ -1083,6 +1171,12 @@ function showRegionInfo(region) {
             <label>支持的渠道</label>
             <div class="value">
                 <div class="channels">${channelsHtml}</div>
+            </div>
+        </div>
+        <div class="info-item">
+            <label>支持的站点</label>
+            <div class="value">
+                ${sites.length > 0 ? `<div class="channels">${sitesHtml}</div>` : '-'}
             </div>
         </div>
         ${region.latitude && region.longitude ? `
