@@ -333,6 +333,12 @@ function initGlobe() {
         specular: new THREE.Color(0x222222)
     });
     
+    // Show loading indicator
+    const loadingIndicator = document.getElementById('globe-loading');
+    if (loadingIndicator) {
+        loadingIndicator.classList.remove('hidden');
+    }
+    
     // Try multiple texture sources for reliability
     const textureUrls = [
         'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
@@ -343,11 +349,19 @@ function initGlobe() {
     let textureLoaded = false;
     let currentTextureIndex = 0;
     
+    // Function to hide loading indicator
+    function hideLoadingIndicator() {
+        if (loadingIndicator) {
+            loadingIndicator.classList.add('hidden');
+        }
+    }
+    
     function tryLoadTexture(index) {
         if (index >= textureUrls.length) {
             // All textures failed, use color fallback
             console.warn('All Earth texture sources failed, using color fallback');
             material.color.setHex(0x2233ff);
+            hideLoadingIndicator();
             return;
         }
         
@@ -359,6 +373,7 @@ function initGlobe() {
                     material.map = texture;
                     material.needsUpdate = true;
                     console.log('Earth texture loaded from source', index + 1);
+                    hideLoadingIndicator();
                 }
             },
             undefined,
