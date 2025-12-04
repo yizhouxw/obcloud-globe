@@ -1,5 +1,6 @@
 regions:
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 中国 (香港)
   launch_date: 待补充
   availability_zones: 待补充
@@ -9,6 +10,7 @@ regions:
   latitude: 22.3193
   longitude: 114.1694
 - cloud_provider: AWS
+  obcloud_site: 中国站
   region: 北京
   launch_date: 待补充
   availability_zones: 待补充
@@ -18,6 +20,7 @@ regions:
   latitude: 39.9042
   longitude: 116.4074
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 印尼 (雅加达)
   launch_date: 待补充
   availability_zones: 待补充
@@ -27,6 +30,7 @@ regions:
   latitude: -6.2088
   longitude: 106.8456
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 印度 (孟买)
   launch_date: 待补充
   availability_zones: 待补充
@@ -36,6 +40,7 @@ regions:
   latitude: 19.076
   longitude: 72.8777
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 巴西 （圣保罗）
   launch_date: 待补充
   availability_zones: 待补充
@@ -45,6 +50,7 @@ regions:
   latitude: -23.5505
   longitude: -46.6333
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 德国 (法兰克福)
   launch_date: 待补充
   availability_zones: 待补充
@@ -54,6 +60,7 @@ regions:
   latitude: 50.1109
   longitude: 8.6821
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 新加坡
   launch_date: 待补充
   availability_zones: 待补充
@@ -63,6 +70,7 @@ regions:
   latitude: 1.3521
   longitude: 103.8198
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 日本 (东京)
   launch_date: 待补充
   availability_zones: 待补充
@@ -72,6 +80,7 @@ regions:
   latitude: 35.6762
   longitude: 139.6503
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 法国 （巴黎）
   launch_date: 待补充
   availability_zones: 待补充
@@ -81,6 +90,7 @@ regions:
   latitude: 48.8566
   longitude: 2.3522
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 美国 (俄勒冈)
   launch_date: 待补充
   availability_zones: 待补充
@@ -90,6 +100,7 @@ regions:
   latitude: 45.5152
   longitude: -122.6784
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 美国 (弗吉尼亚)
   launch_date: 待补充
   availability_zones: 待补充
@@ -99,6 +110,7 @@ regions:
   latitude: 38.9072
   longitude: -77.0369
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 美国 (美西-加州北)
   launch_date: 待补充
   availability_zones: 待补充
@@ -108,6 +120,7 @@ regions:
   latitude: 37.7749
   longitude: -122.4194
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 美国 （俄亥俄）
   launch_date: 待补充
   availability_zones: 待补充
@@ -117,6 +130,7 @@ regions:
   latitude: 39.9612
   longitude: -82.9988
 - cloud_provider: AWS
+  obcloud_site: 国际站
   region: 马来西亚 （吉隆坡）
   launch_date: 待补充
   availability_zones: 待补充

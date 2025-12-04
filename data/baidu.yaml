@@ -1,5 +1,6 @@
 regions:
 - cloud_provider: 百度云
+  obcloud_site: 中国站
   region: 保定
   launch_date: 待补充
   availability_zones: 待补充
@@ -8,6 +9,7 @@ regions:
   latitude: 38.851
   longitude: 115.49
 - cloud_provider: 百度云
+  obcloud_site: 中国站
   region: 北京
   launch_date: 待补充
   availability_zones: 待补充
@@ -16,6 +18,7 @@ regions:
   latitude: 39.9042
   longitude: 116.4074
 - cloud_provider: 百度云
+  obcloud_site: 中国站
   region: 武汉
   launch_date: 待补充
   availability_zones: 待补充

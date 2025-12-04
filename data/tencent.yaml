@@ -1,5 +1,6 @@
 regions:
 - cloud_provider: 腾讯云
+  obcloud_site: 中国站
   region: 上海
   launch_date: 待补充
   availability_zones: 待补充
@@ -8,6 +9,7 @@ regions:
   latitude: 31.2304
   longitude: 121.4737
 - cloud_provider: 腾讯云
+  obcloud_site: 中国站
   region: 北京
   launch_date: 待补充
   availability_zones: 待补充
@@ -16,6 +18,7 @@ regions:
   latitude: 39.9042
   longitude: 116.4074
 - cloud_provider: 腾讯云
+  obcloud_site: 中国站
   region: 广州
   launch_date: 待补充
   availability_zones: 待补充
@@ -24,6 +27,7 @@ regions:
   latitude: 23.1291
   longitude: 113.2644
 - cloud_provider: 腾讯云
+  obcloud_site: 中国站
   region: 成都
   launch_date: 待补充
   availability_zones: 待补充
@@ -32,6 +36,7 @@ regions:
   latitude: 30.6624
   longitude: 104.0633
 - cloud_provider: 腾讯云
+  obcloud_site: 中国站
   region: 新加坡
   launch_date: 待补充
   availability_zones: 待补充

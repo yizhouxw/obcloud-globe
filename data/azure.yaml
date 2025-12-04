@@ -1,5 +1,6 @@
 regions:
 - cloud_provider: Azure
+  obcloud_site: 国际站
   region: 新加坡
   launch_date: 待补充
   availability_zones: 待补充
@@ -8,6 +9,7 @@ regions:
   latitude: 1.3521
   longitude: 103.8198
 - cloud_provider: Azure
+  obcloud_site: 国际站
   region: 爱尔兰
   launch_date: 待补充
   availability_zones: 待补充
@@ -16,6 +18,7 @@ regions:
   latitude: 53.3498
   longitude: -6.2603
 - cloud_provider: Azure
+  obcloud_site: 国际站
   region: 美国 (弗吉尼亚)
   launch_date: 待补充
   availability_zones: 待补充
@@ -24,6 +27,7 @@ regions:
   latitude: 38.9072
   longitude: -77.0369
 - cloud_provider: Azure
+  obcloud_site: 国际站
   region: 马来西亚 （吉隆坡）
   launch_date: 待补充
   availability_zones: 待补充
