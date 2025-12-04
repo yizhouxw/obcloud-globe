@@ -340,7 +340,9 @@ function initGlobe() {
     }
     
     // Try multiple texture sources for reliability
+    // Priority: local file first, then remote fallbacks
     const textureUrls = [
+        'assets/earth_atmos_2048.jpg',  // Local file (fastest)
         'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
         'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
         'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_atmos_2048.jpg'
