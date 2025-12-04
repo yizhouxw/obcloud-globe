@@ -158,9 +158,10 @@ function setupEventListeners() {
         });
     });
 
-    // Filter selects
+    // Filter selects and input
     document.getElementById('cloudProviderFilter').addEventListener('change', applyFilters);
-    document.getElementById('regionFilter').addEventListener('change', applyFilters);
+    document.getElementById('channelFilter').addEventListener('change', applyFilters);
+    document.getElementById('regionFilter').addEventListener('input', applyFilters);
 
     // Close overlapping markers popup
     const closePopupBtn = document.getElementById('close-overlapping-popup');
@@ -215,7 +216,17 @@ function setupEventListeners() {
 function initializeFilters() {
     const cloudProviders = [...new Set(regionsData.map(r => r.cloud_provider))].sort();
     const regions = [...new Set(regionsData.map(r => r.region))].sort();
+    
+    // Get all unique channels from all regions
+    const allChannels = new Set();
+    regionsData.forEach(region => {
+        if (region.channels && Array.isArray(region.channels)) {
+            region.channels.forEach(channel => allChannels.add(channel));
+        }
+    });
+    const channels = [...allChannels].sort();
 
+    // Initialize cloud provider filter
     const cloudProviderSelect = document.getElementById('cloudProviderFilter');
     cloudProviders.forEach(provider => {
         const option = document.createElement('option');
@@ -224,24 +235,43 @@ function initializeFilters() {
         cloudProviderSelect.appendChild(option);
     });
 
-    const regionSelect = document.getElementById('regionFilter');
+    // Initialize channel filter
+    const channelSelect = document.getElementById('channelFilter');
+    channels.forEach(channel => {
+        const option = document.createElement('option');
+        option.value = channel;
+        option.textContent = channel;
+        channelSelect.appendChild(option);
+    });
+
+    // Initialize region filter with datalist for search
+    const regionDatalist = document.getElementById('regionOptions');
     regions.forEach(region => {
         const option = document.createElement('option');
         option.value = region;
-        option.textContent = region;
-        regionSelect.appendChild(option);
+        regionDatalist.appendChild(option);
     });
 }
 
 // Apply filters
 function applyFilters() {
     const cloudProviderFilter = document.getElementById('cloudProviderFilter').value;
-    const regionFilter = document.getElementById('regionFilter').value;
+    const channelFilter = document.getElementById('channelFilter').value;
+    const regionFilter = document.getElementById('regionFilter').value.trim();
 
     filteredRegions = regionsData.filter(region => {
+        // Match cloud provider
         const matchProvider = !cloudProviderFilter || region.cloud_provider === cloudProviderFilter;
-        const matchRegion = !regionFilter || region.region === regionFilter;
-        return matchProvider && matchRegion;
+        
+        // Match channel (check if region has the selected channel)
+        const matchChannel = !channelFilter || 
+            (region.channels && Array.isArray(region.channels) && region.channels.includes(channelFilter));
+        
+        // Match region with fuzzy search (case-insensitive)
+        const matchRegion = !regionFilter || 
+            region.region.toLowerCase().includes(regionFilter.toLowerCase());
+        
+        return matchProvider && matchChannel && matchRegion;
     });
 
     updateCurrentView();

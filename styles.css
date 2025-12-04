@@ -92,6 +92,25 @@ header h1 {
     outline-offset: 2px;
 }
 
+.filter-input {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background: white;
+    color: #333;
+    font-size: 0.9rem;
+    min-width: 200px;
+}
+
+.filter-input:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+.filter-input::placeholder {
+    color: #999;
+}
+
 main {
     position: relative;
     height: calc(100vh - 180px);
