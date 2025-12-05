@@ -15,30 +15,37 @@
 <body>
     <div class="container">
         <header>
-            <h1>OB Cloud 全球地域分布</h1>
+            <h1 data-i18n="app_title">OB Cloud 全球地域分布</h1>
             <div class="header-controls">
+                <div class="lang-selector" style="margin-right: 1rem;">
+                    <select id="languageSelect" class="filter-select" aria-label="Select Language">
+                        <option value="zh">中文</option>
+                        <option value="en">English</option>
+                        <option value="ja">日本語</option>
+                    </select>
+                </div>
                 <nav class="view-mode-selector">
                     <button class="view-mode-btn active" data-mode="globe" title="3D 地球视图">
-                        <span>🌍</span> Globe
+                        <span>🌍</span> <span data-i18n="view_globe">Globe</span>
                     </button>
                     <button class="view-mode-btn" data-mode="map" title="平铺地图视图">
-                        <span>🗺️</span> Map
+                        <span>🗺️</span> <span data-i18n="view_map">Map</span>
                     </button>
                     <button class="view-mode-btn" data-mode="table" title="列表视图">
-                        <span>📋</span> Table
+                        <span>📋</span> <span data-i18n="view_table">Table</span>
                     </button>
                 </nav>
                 <div class="filters">
                     <select id="siteFilter" class="filter-select" aria-label="Filter by Site">
-                        <option value="">所有站点</option>
+                        <option value="" data-i18n="filter_all_sites">所有站点</option>
                     </select>
                     <select id="cloudProviderFilter" class="filter-select" aria-label="Filter by Cloud Provider">
-                        <option value="">所有云厂商</option>
+                        <option value="" data-i18n="filter_all_providers">所有云厂商</option>
                     </select>
                     <select id="channelFilter" class="filter-select" aria-label="Filter by Channel">
-                        <option value="">所有渠道</option>
+                        <option value="" data-i18n="filter_all_channels">所有渠道</option>
                     </select>
-                    <input type="text" id="regionFilter" class="filter-input" list="regionOptions" placeholder="搜索区域..." aria-label="Search Region">
+                    <input type="text" id="regionFilter" class="filter-input" list="regionOptions" placeholder="搜索区域..." aria-label="Search Region" data-i18n="search_placeholder">
                     <datalist id="regionOptions">
                     </datalist>
                 </div>
@@ -52,10 +59,10 @@
                     <div id="globe-canvas"></div>
                     <div id="globe-loading" class="globe-loading">
                         <div class="loading-spinner"></div>
-                        <div class="loading-text">地图资源加载中...</div>
+                        <div class="loading-text" data-i18n="loading_map">地图资源加载中...</div>
                     </div>
                     <div class="legend" id="globe-legend">
-                        <div class="legend-title">云厂商</div>
+                        <div class="legend-title" data-i18n="legend_cloud_provider">云厂商</div>
                     </div>
                 </div>
 
@@ -71,13 +78,13 @@
                             <table id="regions-table-header" class="table-header">
                                 <thead>
                                     <tr>
-                                        <th>云厂商</th>
-                                        <th>地域</th>
-                                        <th>地域代码</th>
-                                        <th>可用区数量</th>
-                                        <th>开服日期</th>
-                                        <th>支持的渠道</th>
-                                        <th>支持的站点</th>
+                                        <th data-i18n="table_provider">云厂商</th>
+                                        <th data-i18n="table_region">地域</th>
+                                        <th data-i18n="table_code">地域代码</th>
+                                        <th data-i18n="table_az">可用区数量</th>
+                                        <th data-i18n="table_date">开服日期</th>
+                                        <th data-i18n="table_channels">支持的渠道</th>
+                                        <th data-i18n="table_sites">支持的站点</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -95,11 +102,11 @@
             <!-- Region Info Sidebar -->
             <aside id="region-info-sidebar" class="info-sidebar">
                 <div class="sidebar-header">
-                    <h2>地域信息</h2>
+                    <h2 data-i18n="sidebar_title">地域信息</h2>
                 </div>
                 <div id="region-info-content" class="sidebar-content">
                     <div class="empty-state">
-                        <p>点击地图上的标记点查看地域详细信息</p>
+                        <p data-i18n="sidebar_empty">点击地图上的标记点查看地域详细信息</p>
                     </div>
                 </div>
             </aside>
@@ -107,7 +114,7 @@
             <!-- Overlapping Markers Popup -->
             <div id="overlapping-markers-popup" class="overlapping-popup hidden" role="dialog" aria-labelledby="popup-title">
                 <div class="popup-header">
-                    <h3 id="popup-title">选择地域</h3>
+                    <h3 id="popup-title" data-i18n="popup_title">选择地域</h3>
                     <button class="popup-close-btn" id="close-overlapping-popup" aria-label="Close popup">×</button>
                 </div>
                 <div class="popup-content" id="overlapping-markers-list">
@@ -116,6 +123,8 @@
         </main>
     </div>
 
+    <script src="translations.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
+

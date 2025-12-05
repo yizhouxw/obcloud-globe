@@ -14,6 +14,8 @@ let globeMarkers = [];
 let amapMap;
 let amapMarkers = [];
 let isAMapLoaded = false;
+let amapScriptLang = null;
+let amapScriptEl = null;
 
 // Cloud provider color configuration
 const CLOUD_PROVIDER_COLORS = {
@@ -65,8 +67,11 @@ function getCloudProviderConfig(provider) {
 
 // Initialize application
 async function init() {
-    // Load map script
-    loadAMapScript();
+    // Load map script with current language
+    loadAMapScript(currentLang);
+
+    // Initialize translations
+    updatePageText();
 
     await loadRegionsData();
     setupEventListeners();
@@ -74,29 +79,62 @@ async function init() {
     // Initialize sidebar to empty state
     resetSidebar();
     switchView('globe');
+
+    // Listen for language changes
+    document.addEventListener('languageChanged', (e) => {
+        const lang = e.detail.lang;
+        const langCode = lang === 'zh' ? 'zh_cn' : 'en';
+        console.log(`[App] Recreating AMap with lang: ${lang}`);
+        if (!isAMapLoaded || amapScriptLang !== langCode) {
+            loadAMapScript(lang);
+        } else if (currentViewMode === 'map') {
+            recreateAMap(lang);
+        }
+    });
 }
 
-// Load AMap Script
-function loadAMapScript() {
-    if (typeof AMAP_API_KEY !== 'undefined' && AMAP_API_KEY !== 'YOUR_AMAP_KEY_HERE') {
-        const script = document.createElement('script');
-        script.src = `https://webapi.amap.com/maps?v=2.0&key=${AMAP_API_KEY}`;
-        script.async = true;
-        script.onload = function() {
-            console.log('高德地图 API 加载完成');
-            isAMapLoaded = true;
-            // Trigger map initialization if already in map view or pending
-            if (currentViewMode === 'map' && !amapMap) {
-                initMap();
-            }
-        };
-        script.onerror = function() {
-            console.error('高德地图 API 加载失败，请检查 API Key 是否正确');
-        };
-        document.head.appendChild(script);
-    } else {
+// Load AMap Script with target language
+function loadAMapScript(targetLang = currentLang) {
+    if (typeof AMAP_API_KEY === 'undefined' || AMAP_API_KEY === 'YOUR_AMAP_KEY_HERE') {
         console.warn('高德地图 API Key 未配置，请在 config.js 中设置 AMAP_API_KEY');
+        return;
     }
+
+    const langCode = targetLang === 'zh' ? 'zh_cn' : 'en';
+
+    // If already loaded with same language, do nothing
+    if (isAMapLoaded && amapScriptLang === langCode) {
+        return;
+    }
+
+    // Remove existing script tag if present
+    if (amapScriptEl && amapScriptEl.parentNode) {
+        amapScriptEl.parentNode.removeChild(amapScriptEl);
+    }
+
+    // Reset flags before reloading
+    isAMapLoaded = false;
+    window.AMap = undefined;
+
+    const script = document.createElement('script');
+    script.id = 'amap-script';
+    script.src = `https://webapi.amap.com/maps?v=2.0&key=${AMAP_API_KEY}&language=${langCode}`;
+    script.async = true;
+    script.onload = function() {
+        console.log(`高德地图 API 加载完成 (language=${langCode})`);
+        isAMapLoaded = true;
+        amapScriptLang = langCode;
+        // If currently in map view, recreate the map to apply language
+        if (currentViewMode === 'map') {
+            recreateAMap(currentLang);
+        }
+    };
+    script.onerror = function() {
+        console.error('高德地图 API 加载失败，请检查 API Key 或网络');
+    };
+
+    amapScriptEl = script;
+    document.head.appendChild(script);
 }
 
 // Load regions data from multiple YAML files (one per cloud provider)
@@ -171,7 +209,7 @@ async function loadRegionsData() {
         }
     } catch (error) {
         console.error('Error loading regions data:', error);
-        alert('无法加载地域数据，请检查 data/ 目录下的 YAML 文件');
+        alert(t('alert_load_fail'));
     }
 }
 
@@ -190,6 +228,14 @@ function setupEventListeners() {
     document.getElementById('cloudProviderFilter').addEventListener('change', applyFilters);
     document.getElementById('channelFilter').addEventListener('change', applyFilters);
     document.getElementById('regionFilter').addEventListener('input', applyFilters);
+
+    // Language selector
+    const languageSelect = document.getElementById('languageSelect');
+    if (languageSelect) {
+        languageSelect.addEventListener('change', (e) => {
+            setLanguage(e.target.value);
+        });
+    }
 
     // Close overlapping markers popup
     const closePopupBtn = document.getElementById('close-overlapping-popup');
@@ -251,6 +297,12 @@ function getObcloudSites(region) {
 
 // Initialize filter dropdowns
 function initializeFilters() {
+    // Save current selections if any
+    const currentSite = document.getElementById('siteFilter') ? document.getElementById('siteFilter').value : '';
+    const currentProvider = document.getElementById('cloudProviderFilter') ? document.getElementById('cloudProviderFilter').value : '';
+    const currentChannel = document.getElementById('channelFilter') ? document.getElementById('channelFilter').value : '';
+    const currentRegion = document.getElementById('regionFilter') ? document.getElementById('regionFilter').value : '';
+
     const cloudProviders = [...new Set(regionsData.map(r => r.cloud_provider))].sort();
     const regions = [...new Set(regionsData.map(r => r.region))].sort();
     
@@ -273,36 +325,43 @@ function initializeFilters() {
 
     // Initialize site filter
     const siteSelect = document.getElementById('siteFilter');
+    siteSelect.innerHTML = `<option value="">${t('filter_all_sites')}</option>`;
     sites.forEach(site => {
         const option = document.createElement('option');
         option.value = site;
-        option.textContent = site;
+        option.textContent = t(site);
         siteSelect.appendChild(option);
     });
+    if (currentSite) siteSelect.value = currentSite;
 
     // Initialize cloud provider filter
     const cloudProviderSelect = document.getElementById('cloudProviderFilter');
+    cloudProviderSelect.innerHTML = `<option value="">${t('filter_all_providers')}</option>`;
     cloudProviders.forEach(provider => {
         const option = document.createElement('option');
         option.value = provider;
-        option.textContent = provider;
+        option.textContent = t(provider);
         cloudProviderSelect.appendChild(option);
     });
+    if (currentProvider) cloudProviderSelect.value = currentProvider;
 
     // Initialize channel filter
     const channelSelect = document.getElementById('channelFilter');
+    channelSelect.innerHTML = `<option value="">${t('filter_all_channels')}</option>`;
     channels.forEach(channel => {
         const option = document.createElement('option');
         option.value = channel;
-        option.textContent = channel;
+        option.textContent = t(channel);
         channelSelect.appendChild(option);
     });
+    if (currentChannel) channelSelect.value = currentChannel;
 
     // Initialize region filter with datalist for search
     const regionDatalist = document.getElementById('regionOptions');
+    regionDatalist.innerHTML = '';
     regions.forEach(region => {
         const option = document.createElement('option');
-        option.value = region;
+        option.value = t(region); // Show translated value in datalist
         regionDatalist.appendChild(option);
     });
 }
@@ -328,7 +387,7 @@ function applyFilters() {
         
         // Match region with fuzzy search (case-insensitive)
         const matchRegion = !regionFilter || 
-            region.region.toLowerCase().includes(regionFilter.toLowerCase());
+            t(region.region).toLowerCase().includes(regionFilter.toLowerCase());
         
         return matchSite && matchProvider && matchChannel && matchRegion;
     });
@@ -760,7 +819,7 @@ function updateGlobeLegend() {
     // Add title
     const titleDiv = document.createElement('div');
     titleDiv.className = 'legend-title';
-    titleDiv.textContent = '云厂商';
+    titleDiv.textContent = t('legend_cloud_provider');
     legend.appendChild(titleDiv);
 
     // Add legend items for each provider
@@ -772,7 +831,7 @@ function updateGlobeLegend() {
         item.className = 'legend-item';
         item.innerHTML = `
             <span class="legend-color" style="background: ${colorHex};"></span>
-            <span>${config.name}</span>
+            <span>${t(provider)}</span>
         `;
         legend.appendChild(item);
     });
@@ -833,15 +892,18 @@ function createGlobeMarker(region) {
     return markerGroup;
 }
 
-// Initialize Map view with 高德地图
+// Initialize Map view (AMap)
 function initMap() {
-    // Check if AMap is loaded
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) return;
+
+    // Clear container when switching providers
+    mapContainer.innerHTML = '';
+
+    // AMap path
     if (!isAMapLoaded || typeof AMap === 'undefined') {
-        // If script is not loaded yet, just return. It will be initialized by onload callback.
-        // But if we switched to map view, we might want to show a loading state in the map container
-        const mapContainer = document.getElementById('map');
         if (mapContainer && mapContainer.innerHTML === '') {
-            mapContainer.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">地图加载中...</div>';
+            mapContainer.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">${t('loading_amap')}</div>`;
         }
         return;
     }
@@ -849,25 +911,54 @@ function initMap() {
     initializeAMap();
 }
 
-// Initialize 高德地图 instance
-function initializeAMap() {
+// Recreate 高德地图 with the given language (AMap v2 lacks setLang, so recreate)
+function recreateAMap(lang) {
+    if (!isAMapLoaded || typeof AMap === 'undefined') return;
+
     try {
-        // Initialize 高德地图
+        const langCode = lang === 'zh' ? 'zh_cn' : 'en';
+
+        // Preserve current view if map already exists
+        const zoom = amapMap ? amapMap.getZoom() : 2;
+        const centerLngLat = amapMap ? amapMap.getCenter() : new AMap.LngLat(0, 20);
+
+        // Destroy old instance to avoid leaks
+        if (amapMap && typeof amapMap.destroy === 'function') {
+            amapMap.destroy();
+        }
+
         amapMap = new AMap.Map('map', {
-            zoom: 2,
-            center: [0, 20],
+            zoom,
+            center: centerLngLat,
             viewMode: '3D',
-            mapStyle: 'amap://styles/normal'
+            mapStyle: 'amap://styles/normal',
+            lang: langCode
         });
 
+        // Expose map instance globally for potential future hooks
+        window.amapMap = amapMap;
+
+        // Re-render markers
         updateMap();
     } catch (error) {
         console.error('高德地图初始化失败:', error);
-        document.getElementById('map').innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666; flex-direction: column; gap: 1rem;"><div>高德地图初始化失败</div><div style="font-size: 0.9rem;">请检查控制台错误信息</div></div>';
+        document.getElementById('map').innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666; flex-direction: column; gap: 1rem;"><div>${t('amap_fail')}</div><div style="font-size: 0.9rem;">${t('check_console')}</div></div>`;
     }
 }
 
-// Update Map with markers
+// Initialize 高德地图 instance
+function initializeAMap() {
+    recreateAMap(currentLang);
+}
+
+function getMapTilerKey() {
+    if (typeof MAPTILER_API_KEY !== 'undefined') return MAPTILER_API_KEY;
+    if (typeof window !== 'undefined' && typeof window.MAPTILER_API_KEY !== 'undefined') return window.MAPTILER_API_KEY;
+    return undefined;
+}
+
+// (MapLibre removed)
+
 function updateMap() {
     if (!amapMap) return;
 
@@ -904,7 +995,7 @@ function updateMap() {
         // Create custom marker icon with cloud provider color
         const markerContent = document.createElement('div');
         markerContent.className = 'custom-marker';
-        markerContent.title = `${region.region} (${region.cloud_provider})`;
+        markerContent.title = `${t(region.region)} (${t(region.cloud_provider)})`;
         markerContent.style.cssText = `
             background: ${providerColorHex};
             border: 3px solid white;
@@ -956,7 +1047,7 @@ function updateMap() {
             position: [region.longitude, region.latitude],
             content: markerContent,
             offset: new AMap.Pixel(-12, -12),
-            title: region.region
+            title: t(region.region)
         });
 
         // Store region data for selection
@@ -1010,10 +1101,10 @@ function updateMap() {
 function createPopupContent(region) {
     return `
         <div style="min-width: 200px;">
-            <h3 style="margin: 0 0 0.5rem 0; color: #667eea;">${region.region}</h3>
-            <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>云厂商:</strong> ${region.cloud_provider}</p>
-            <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>可用区:</strong> ${region.availability_zones}</p>
-            <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>开服日期:</strong> ${region.launch_date}</p>
+            <h3 style="margin: 0 0 0.5rem 0; color: #667eea;">${t(region.region)}</h3>
+            <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>${t('label_provider')}:</strong> ${t(region.cloud_provider)}</p>
+            <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>${t('label_az')}:</strong> ${t(region.availability_zones)}</p>
+            <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>${t('label_date')}:</strong> ${t(region.launch_date)}</p>
         </div>
     `;
 }
@@ -1057,7 +1148,7 @@ function updateTable() {
     tbody.innerHTML = '';
 
     if (filteredRegions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #999;">没有找到匹配的地域</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #999;">${t('no_match')}</td></tr>`;
         // Sync widths even for empty table
         setTimeout(syncTableColumnWidths, 0);
         return;
@@ -1082,20 +1173,20 @@ function updateTable() {
         });
 
         const channelsHtml = region.channels.map(ch => 
-            `<span class="channel-tag">${ch}</span>`
+            `<span class="channel-tag">${t(ch)}</span>`
         ).join('');
         
         const sites = getObcloudSites(region);
         const sitesHtml = sites.length > 0 
-            ? sites.map(site => `<span class="channel-tag">${site}</span>`).join('')
+            ? sites.map(site => `<span class="channel-tag">${t(site)}</span>`).join('')
             : '-';
 
         row.innerHTML = `
-            <td>${region.cloud_provider}</td>
-            <td>${region.region}</td>
+            <td>${t(region.cloud_provider)}</td>
+            <td>${t(region.region)}</td>
             <td>${region.region_code || '-'}</td>
-            <td>${region.availability_zones}</td>
-            <td>${region.launch_date}</td>
+            <td>${t(region.availability_zones)}</td>
+            <td>${t(region.launch_date)}</td>
             <td><div class="channels">${channelsHtml}</div></td>
             <td>${sites.length > 0 ? `<div class="channels">${sitesHtml}</div>` : '-'}</td>
         `;
@@ -1114,7 +1205,7 @@ function resetSidebar() {
 
     content.innerHTML = `
         <div class="empty-state">
-            <p>点击地图上的标记点查看地域详细信息</p>
+            <p data-i18n="sidebar_empty">${t('sidebar_empty')}</p>
         </div>
     `;
 
@@ -1139,7 +1230,7 @@ function resetSelectedState() {
         }
     });
 
-    // Reset Map markers
+    // Reset Map markers (AMap)
     amapMarkers.forEach(marker => {
         const content = marker.getContent();
         if (content) {
@@ -1148,6 +1239,8 @@ function resetSelectedState() {
             content.style.zIndex = 'auto';
         }
     });
+
+    // Reset MapLibre markers (no selection styling applied)
 }
 
 // Show region info in sidebar
@@ -1165,50 +1258,50 @@ function showRegionInfo(region) {
     const providerColorHex = '#' + providerConfig.color.toString(16).padStart(6, '0');
 
     const channelsHtml = region.channels.map(ch => 
-        `<span class="channel-tag">${ch}</span>`
+        `<span class="channel-tag">${t(ch)}</span>`
     ).join('');
     
     const sites = getObcloudSites(region);
     const sitesHtml = sites.length > 0 
-        ? sites.map(site => `<span class="channel-tag">${site}</span>`).join('')
+        ? sites.map(site => `<span class="channel-tag">${t(site)}</span>`).join('')
         : '-';
 
     content.innerHTML = `
-        <h3 style="color: ${providerColorHex};">${region.region}</h3>
+        <h3 style="color: ${providerColorHex};">${t(region.region)}</h3>
         <div class="info-item">
-            <label>云厂商</label>
+            <label>${t('label_provider')}</label>
             <div class="value">
                 <span style="display: inline-block; width: 12px; height: 12px; background: ${providerColorHex}; border-radius: 50%; margin-right: 0.5rem; vertical-align: middle;"></span>
-                ${region.cloud_provider}
+                ${t(region.cloud_provider)}
             </div>
         </div>
         <div class="info-item">
-            <label>地域代码</label>
+            <label>${t('label_code')}</label>
             <div class="value">${region.region_code || '-'}</div>
         </div>
         <div class="info-item">
-            <label>可用区数量</label>
-            <div class="value">${region.availability_zones}</div>
+            <label>${t('label_az')}</label>
+            <div class="value">${t(region.availability_zones)}</div>
         </div>
         <div class="info-item">
-            <label>开服日期</label>
-            <div class="value">${region.launch_date}</div>
+            <label>${t('label_date')}</label>
+            <div class="value">${t(region.launch_date)}</div>
         </div>
         <div class="info-item">
-            <label>支持的渠道</label>
+            <label>${t('label_channels')}</label>
             <div class="value">
                 <div class="channels">${channelsHtml}</div>
             </div>
         </div>
         <div class="info-item">
-            <label>支持的站点</label>
+            <label>${t('label_sites')}</label>
             <div class="value">
                 ${sites.length > 0 ? `<div class="channels">${sitesHtml}</div>` : '-'}
             </div>
         </div>
         ${region.latitude && region.longitude ? `
         <div class="info-item">
-            <label>坐标</label>
+            <label>${t('label_coords')}</label>
             <div class="value">${region.latitude.toFixed(4)}, ${region.longitude.toFixed(4)}</div>
         </div>
         ` : ''}
@@ -1295,8 +1388,8 @@ function showOverlappingMarkersPopup(regions, x, y) {
         item.innerHTML = `
             <span class="overlapping-marker-color" style="background: ${providerColorHex};"></span>
             <div class="overlapping-marker-info">
-                <div class="overlapping-marker-name">${region.region}</div>
-                <div class="overlapping-marker-provider">${region.cloud_provider}</div>
+                <div class="overlapping-marker-name">${t(region.region)}</div>
+                <div class="overlapping-marker-provider">${t(region.cloud_provider)}</div>
             </div>
         `;
         item.addEventListener('click', () => {
