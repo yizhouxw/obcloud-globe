@@ -232,6 +232,9 @@ function setupEventListeners() {
     // Language selector
     const languageSelect = document.getElementById('languageSelect');
     if (languageSelect) {
+        if (languageSelect.value !== currentLang) {
+            languageSelect.value = currentLang;
+        }
         languageSelect.addEventListener('change', (e) => {
             setLanguage(e.target.value);
         });

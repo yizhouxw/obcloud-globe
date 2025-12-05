@@ -286,11 +286,26 @@ const translations = {
     }
 };
 
-let currentLang = 'zh';
+function getSupportedLang(lang) {
+    if (!lang) return 'en';
+    const lower = lang.toLowerCase();
+    if (translations[lower]) return lower;
+    if (lower.startsWith('zh')) return 'zh';
+    if (lower.startsWith('ja')) return 'ja';
+    return 'en';
+}
+
+function detectInitialLanguage() {
+    const navLang = (typeof navigator !== 'undefined' && (navigator.language || (navigator.languages && navigator.languages[0]))) || '';
+    return getSupportedLang(navLang);
+}
+
+let currentLang = detectInitialLanguage();
 
 function setLanguage(lang) {
-    if (translations[lang]) {
-        currentLang = lang;
+    const normalized = getSupportedLang(lang);
+    if (translations[normalized]) {
+        currentLang = normalized;
         updatePageText();
         // Trigger data update if necessary (e.g., re-render table)
         if (typeof updateCurrentView === 'function') {
