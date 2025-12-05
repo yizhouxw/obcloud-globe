@@ -9,30 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- 高德地图配置 -->
     <script src="config.js"></script>
-    <!-- 动态加载高德地图 API -->
-    <script>
-        // Load 高德地图 API with key from config.js
-        (function() {
-            if (typeof AMAP_API_KEY !== 'undefined' && AMAP_API_KEY !== 'YOUR_AMAP_KEY_HERE') {
-                const script = document.createElement('script');
-                script.src = `https://webapi.amap.com/maps?v=2.0&key=${AMAP_API_KEY}`;
-                script.async = true;
-                script.onload = function() {
-                    console.log('高德地图 API 加载完成');
-                    // Trigger map initialization if already in map view
-                    if (typeof window.amapReadyCallback === 'function') {
-                        window.amapReadyCallback();
-                    }
-                };
-                script.onerror = function() {
-                    console.error('高德地图 API 加载失败，请检查 API Key 是否正确');
-                };
-                document.head.appendChild(script);
-            } else {
-                console.warn('高德地图 API Key 未配置，请在 config.js 中设置 AMAP_API_KEY');
-            }
-        })();
-    </script>
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 </head>
@@ -41,7 +17,7 @@
         <header>
             <h1>OB Cloud 全球地域分布</h1>
             <div class="header-controls">
-                <div class="view-mode-selector">
+                <nav class="view-mode-selector">
                     <button class="view-mode-btn active" data-mode="globe" title="3D 地球视图">
                         <span>🌍</span> Globe
                     </button>
@@ -51,18 +27,18 @@
                     <button class="view-mode-btn" data-mode="table" title="列表视图">
                         <span>📋</span> Table
                     </button>
-                </div>
+                </nav>
                 <div class="filters">
-                    <select id="siteFilter" class="filter-select">
+                    <select id="siteFilter" class="filter-select" aria-label="Filter by Site">
                         <option value="">所有站点</option>
                     </select>
-                    <select id="cloudProviderFilter" class="filter-select">
+                    <select id="cloudProviderFilter" class="filter-select" aria-label="Filter by Cloud Provider">
                         <option value="">所有云厂商</option>
                     </select>
-                    <select id="channelFilter" class="filter-select">
+                    <select id="channelFilter" class="filter-select" aria-label="Filter by Channel">
                         <option value="">所有渠道</option>
                     </select>
-                    <input type="text" id="regionFilter" class="filter-input" list="regionOptions" placeholder="搜索区域...">
+                    <input type="text" id="regionFilter" class="filter-input" list="regionOptions" placeholder="搜索区域..." aria-label="Search Region">
                     <datalist id="regionOptions">
                     </datalist>
                 </div>
@@ -129,10 +105,10 @@
             </aside>
 
             <!-- Overlapping Markers Popup -->
-            <div id="overlapping-markers-popup" class="overlapping-popup hidden">
+            <div id="overlapping-markers-popup" class="overlapping-popup hidden" role="dialog" aria-labelledby="popup-title">
                 <div class="popup-header">
-                    <h3>选择地域</h3>
-                    <button class="popup-close-btn" id="close-overlapping-popup">×</button>
+                    <h3 id="popup-title">选择地域</h3>
+                    <button class="popup-close-btn" id="close-overlapping-popup" aria-label="Close popup">×</button>
                 </div>
                 <div class="popup-content" id="overlapping-markers-list">
                 </div>
@@ -143,4 +119,3 @@
     <script src="app.js"></script>
 </body>
 </html>
-

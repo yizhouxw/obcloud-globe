@@ -13,6 +13,7 @@ let globeMarkers = [];
 // 高德地图 components
 let amapMap;
 let amapMarkers = [];
+let isAMapLoaded = false;
 
 // Cloud provider color configuration
 const CLOUD_PROVIDER_COLORS = {
@@ -64,12 +65,38 @@ function getCloudProviderConfig(provider) {
 
 // Initialize application
 async function init() {
+    // Load map script
+    loadAMapScript();
+
     await loadRegionsData();
     setupEventListeners();
     initializeFilters();
     // Initialize sidebar to empty state
     resetSidebar();
     switchView('globe');
+}
+
+// Load AMap Script
+function loadAMapScript() {
+    if (typeof AMAP_API_KEY !== 'undefined' && AMAP_API_KEY !== 'YOUR_AMAP_KEY_HERE') {
+        const script = document.createElement('script');
+        script.src = `https://webapi.amap.com/maps?v=2.0&key=${AMAP_API_KEY}`;
+        script.async = true;
+        script.onload = function() {
+            console.log('高德地图 API 加载完成');
+            isAMapLoaded = true;
+            // Trigger map initialization if already in map view or pending
+            if (currentViewMode === 'map' && !amapMap) {
+                initMap();
+            }
+        };
+        script.onerror = function() {
+            console.error('高德地图 API 加载失败，请检查 API Key 是否正确');
+        };
+        document.head.appendChild(script);
+    } else {
+        console.warn('高德地图 API Key 未配置，请在 config.js 中设置 AMAP_API_KEY');
+    }
 }
 
 // Load regions data from multiple YAML files (one per cloud provider)
@@ -322,6 +349,16 @@ function switchView(mode) {
         btn.classList.toggle('active', btn.dataset.mode === mode);
     });
 
+    // Update main layout for full width in table mode
+    const mainElement = document.querySelector('main');
+    if (mainElement) {
+        if (mode === 'table') {
+            mainElement.classList.add('full-width');
+        } else {
+            mainElement.classList.remove('full-width');
+        }
+    }
+
     // Hide all views
     document.querySelectorAll('.view-container').forEach(view => {
         view.classList.remove('active');
@@ -367,6 +404,8 @@ function updateCurrentView() {
 // Initialize 3D Globe
 function initGlobe() {
     const container = document.getElementById('globe-canvas');
+    if (!container) return;
+    
     const width = container.clientWidth;
     const height = container.clientHeight;
 
@@ -402,7 +441,6 @@ function initGlobe() {
     }
     
     // Try multiple texture sources for reliability
-    // Priority: local file first, then remote fallbacks
     const textureUrls = [
         'assets/earth_atmos_2048.jpg',  // Local file (fastest)
         'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
@@ -411,7 +449,6 @@ function initGlobe() {
     ];
     
     let textureLoaded = false;
-    let currentTextureIndex = 0;
     
     // Function to hide loading indicator
     function hideLoadingIndicator() {
@@ -659,6 +696,7 @@ function initGlobe() {
 
     // Handle resize
     window.addEventListener('resize', () => {
+        if (!container) return;
         const width = container.clientWidth;
         const height = container.clientHeight;
         globeCamera.aspect = width / height;
@@ -798,24 +836,13 @@ function createGlobeMarker(region) {
 // Initialize Map view with 高德地图
 function initMap() {
     // Check if AMap is loaded
-    if (typeof AMap === 'undefined') {
-        // Wait for AMap to load (retry mechanism)
-        let retryCount = 0;
-        const maxRetries = 50; // 5 seconds max wait
-        
-        const checkAMap = setInterval(() => {
-            retryCount++;
-            if (typeof AMap !== 'undefined') {
-                clearInterval(checkAMap);
-                // AMap loaded, initialize map
-                initializeAMap();
-            } else if (retryCount >= maxRetries) {
-                clearInterval(checkAMap);
-                console.error('高德地图 API 加载超时，请检查 API Key 配置和网络连接');
-                document.getElementById('map').innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666; flex-direction: column; gap: 1rem;"><div>高德地图 API 加载超时</div><div style="font-size: 0.9rem;">请检查 config.js 中的 API Key 配置</div></div>';
-            }
-        }, 100);
-        
+    if (!isAMapLoaded || typeof AMap === 'undefined') {
+        // If script is not loaded yet, just return. It will be initialized by onload callback.
+        // But if we switched to map view, we might want to show a loading state in the map container
+        const mapContainer = document.getElementById('map');
+        if (mapContainer && mapContainer.innerHTML === '') {
+            mapContainer.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">地图加载中...</div>';
+        }
         return;
     }
 
@@ -1406,4 +1433,3 @@ function checkGlobeMarkerOverlaps(mouseX, mouseY) {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', init);
-
