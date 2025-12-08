@@ -1,8 +1,8 @@
 :root {
     /* Brand Colors */
-    --color-primary: #667eea;
-    --color-secondary: #764ba2;
-    --color-primary-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    --color-primary: #0064C8;
+    --color-secondary: #0046A0;
+    --color-primary-gradient: linear-gradient(90deg, #002D72 0%, #00509D 100%);
     
     /* Cloud Provider Colors */
     --color-aws: #FF9900;
