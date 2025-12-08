@@ -1,9 +1,12 @@
 const translations = {
     'zh': {
         'app_title': 'OB Cloud 全球地域分布',
-        'view_globe': 'Globe',
-        'view_map': 'Map',
-        'view_table': 'Table',
+        'view_globe': '3D 地球',
+        'view_globe_title': '3D 地球视图',
+        'view_map': '2D 地图',
+        'view_map_title': '平铺地图视图',
+        'view_table': '列表',
+        'view_table_title': '列表视图',
         'filter_all_sites': '所有站点',
         'filter_all_providers': '所有云厂商',
         'filter_all_channels': '所有渠道',
@@ -99,8 +102,11 @@ const translations = {
     'en': {
         'app_title': 'OB Cloud Global Regions',
         'view_globe': 'Globe',
+        'view_globe_title': '3D Globe View',
         'view_map': 'Map',
+        'view_map_title': 'Flat Map View',
         'view_table': 'Table',
+        'view_table_title': 'Table View',
         'filter_all_sites': 'All Sites',
         'filter_all_providers': 'All Providers',
         'filter_all_channels': 'All Channels',
@@ -195,9 +201,12 @@ const translations = {
     },
     'ja': {
         'app_title': 'OB Cloud グローバルリージョン',
-        'view_globe': 'Globe',
-        'view_map': 'Map',
-        'view_table': 'Table',
+        'view_globe': '3D 地球',
+        'view_globe_title': '3D地球ビュー',
+        'view_map': '2D 地図',
+        'view_map_title': '地図ビュー',
+        'view_table': 'リスト',
+        'view_table_title': 'リストビュー',
         'filter_all_sites': 'すべてのサイト',
         'filter_all_providers': 'すべてのプロバイダー',
         'filter_all_channels': 'すべてのチャネル',
@@ -349,14 +358,30 @@ function t(key) {
 }
 
 function updatePageText() {
+    console.log('[i18n] Updating page text for language:', currentLang);
+    // Handle standard text content updates
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
         if (translations[currentLang][key]) {
+            console.log(`[i18n] Updating element <${element.tagName.toLowerCase()}> with key "${key}" to "${translations[currentLang][key]}"`);
             if (element.tagName === 'INPUT' && element.getAttribute('placeholder')) {
                 element.placeholder = translations[currentLang][key];
             } else {
                 element.textContent = translations[currentLang][key];
             }
+        } else {
+            console.warn(`[i18n] Missing translation for key "${key}" in language "${currentLang}"`);
+        }
+    });
+
+    // Handle title attribute updates
+    document.querySelectorAll('[data-i18n-title]').forEach(element => {
+        const key = element.getAttribute('data-i18n-title');
+        if (translations[currentLang][key]) {
+             console.log(`[i18n] Updating title for <${element.tagName.toLowerCase()}> with key "${key}" to "${translations[currentLang][key]}"`);
+            element.title = translations[currentLang][key];
+        } else {
+            console.warn(`[i18n] Missing title translation for key "${key}" in language "${currentLang}"`);
         }
     });
     
@@ -364,6 +389,9 @@ function updatePageText() {
     if (translations[currentLang]['app_title']) {
         document.title = translations[currentLang]['app_title'];
     }
+    
+    // Update html lang attribute
+    document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : currentLang;
 }
 
 function updateFilterPlaceholders() {
