@@ -815,7 +815,7 @@ function updateMap() {
 
 // Create popup content for map markers
 function createPopupContent(region) {
-    const azCount = Array.isArray(region.availability_zones) ? region.availability_zones.length : (region.availability_zones || '-');
+    const azCount = Array.isArray(region.availability_zones) ? region.availability_zones.length : t(region.availability_zones || '-');
     return `
         <div style="min-width: 200px;">
             <h3 style="margin: 0 0 0.5rem 0; color: #667eea;">${t(region.region)}</h3>
@@ -898,8 +898,8 @@ function updateTable() {
             ? sites.map(site => `<span class="channel-tag">${t(site)}</span>`).join('')
             : '-';
 
-        const azCount = Array.isArray(region.availability_zones) ? region.availability_zones.length : (region.availability_zones || '-');
-        const azList = Array.isArray(region.availability_zones) ? region.availability_zones.join(', ') : (region.availability_zones || '-');
+        const azCount = Array.isArray(region.availability_zones) ? region.availability_zones.length : t(region.availability_zones || '-');
+        const azList = Array.isArray(region.availability_zones) ? region.availability_zones.join(', ') : t(region.availability_zones || '-');
 
         row.innerHTML = `
             <td>${t(region.cloud_provider)}</td>

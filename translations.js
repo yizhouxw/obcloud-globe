@@ -28,7 +28,7 @@ const translations = {
         'label_provider': '云厂商',
         'label_code': '地域代码',
         'label_az': '可用区数量',
-        'label_az_list': 'Availability Zones',
+        'label_az_list': '可用区列表',
         'label_date': '开服日期',
         'label_channels': '支持的渠道',
         'label_sites': '支持的站点',
