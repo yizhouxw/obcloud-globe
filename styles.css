@@ -92,28 +92,33 @@ header h1 {
 }
 
 .github-link {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-xl);
     color: var(--text-white);
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
     opacity: 0.8;
     transition: all 0.2s ease;
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
+    border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
-    font-weight: 500;
-    font-size: 0.9rem;
+    z-index: 20;
 }
 
 .github-link:hover {
     opacity: 1;
     background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
+    transform: scale(1.1);
 }
 
 .github-link svg {
     fill: currentColor;
+    width: 24px;
+    height: 24px;
 }
 
 .header-controls {
