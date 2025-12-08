@@ -6,9 +6,9 @@ let selectedRegion = null;
 let overlappingMarkersPopup = null;
 let hoverTimeout = null; // Global hover timeout for popup management
 
-// Three.js Globe components
-let globeScene, globeCamera, globeRenderer, globeMesh;
-let globeMarkers = [];
+// Globe components
+let currentGlobe = null;
+let currentGlobeStyle = 'classic';
 
 // 高德地图 components
 let amapMap;
@@ -240,6 +240,17 @@ function setupEventListeners() {
         });
     }
 
+    // Globe style selector
+    const styleSelect = document.getElementById('globeStyleSelect');
+    if (styleSelect) {
+        styleSelect.addEventListener('change', (e) => {
+            currentGlobeStyle = e.target.value;
+            if (currentViewMode === 'globe') {
+                initGlobe(true); // force re-init
+            }
+        });
+    }
+
     // Close overlapping markers popup
     const closePopupBtn = document.getElementById('close-overlapping-popup');
     if (closePopupBtn) {
@@ -443,7 +454,7 @@ function switchView(mode) {
     }
 
     // Initialize view if not already initialized
-    if (mode === 'globe' && !globeRenderer) {
+    if (mode === 'globe' && !currentGlobe) {
         initGlobe();
     } else if (mode === 'map' && !amapMap) {
         initMap();
@@ -464,348 +475,79 @@ function updateCurrentView() {
 }
 
 // Initialize 3D Globe
-function initGlobe() {
+function initGlobe(force = false) {
     const container = document.getElementById('globe-canvas');
     if (!container) return;
     
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    if (currentGlobe && !force) {
+        return;
+    }
 
-    // Scene
-    globeScene = new THREE.Scene();
-    globeScene.background = new THREE.Color(0x0a0e27);
+    if (currentGlobe) {
+        currentGlobe.destroy();
+        currentGlobe = null;
+    }
 
-    // Camera
-    globeCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    globeCamera.position.z = 300;
-
-    // Renderer
-    globeRenderer = new THREE.WebGLRenderer({ antialias: true });
-    globeRenderer.setSize(width, height);
-    container.appendChild(globeRenderer.domElement);
-
-    // Earth geometry
-    const geometry = new THREE.SphereGeometry(100, 64, 64);
-    
-    // Load Earth texture
-    const textureLoader = new THREE.TextureLoader();
-    
-    // Earth material - will be updated when texture loads
-    const material = new THREE.MeshPhongMaterial({
-        shininess: 30,
-        specular: new THREE.Color(0x222222)
-    });
-    
     // Show loading indicator
     const loadingIndicator = document.getElementById('globe-loading');
     if (loadingIndicator) {
         loadingIndicator.classList.remove('hidden');
     }
-    
-    // Try multiple texture sources for reliability
-    const textureUrls = [
-        'assets/earth_atmos_2048.jpg',  // Local file (fastest)
-        'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
-        'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
-        'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_atmos_2048.jpg'
-    ];
-    
-    let textureLoaded = false;
-    
-    // Function to hide loading indicator
-    function hideLoadingIndicator() {
+
+    const config = {
+        onClick: handleGlobeClick
+    };
+
+    if (currentGlobeStyle === 'github') {
+        currentGlobe = new GithubGlobe('globe-canvas', config);
+    } else {
+        currentGlobe = new ClassicGlobe('globe-canvas', config);
+    }
+
+    currentGlobe.init().then(() => {
         if (loadingIndicator) {
             loadingIndicator.classList.add('hidden');
         }
-    }
-    
-    function tryLoadTexture(index) {
-        if (index >= textureUrls.length) {
-            // All textures failed, use color fallback
-            console.warn('All Earth texture sources failed, using color fallback');
-            material.color.setHex(0x2233ff);
-            hideLoadingIndicator();
-            return;
-        }
-        
-        textureLoader.load(
-            textureUrls[index],
-            (texture) => {
-                if (!textureLoaded) {
-                    textureLoaded = true;
-                    material.map = texture;
-                    material.needsUpdate = true;
-                    console.log('Earth texture loaded from source', index + 1);
-                    hideLoadingIndicator();
-                }
-            },
-            undefined,
-            (error) => {
-                console.warn(`Texture source ${index + 1} failed, trying next...`);
-                tryLoadTexture(index + 1);
-            }
-        );
-    }
-    
-    // Start loading texture
-    tryLoadTexture(0);
-    
-    globeMesh = new THREE.Mesh(geometry, material);
-
-    globeScene.add(globeMesh);
-
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-    globeScene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(1, 1, 1);
-    globeScene.add(directionalLight);
-
-    // Auto-rotation control
-    let autoRotate = true;  // Enable auto-rotation by default
-    let lastAutoRotateTime = Date.now();
-    
-    // Function to stop auto-rotation
-    function stopAutoRotate() {
-        autoRotate = false;
-    }
-
-    // Controls (mouse interaction)
-    let isDragging = false;
-    let previousMousePosition = { x: 0, y: 0 };
-    let mouseDownPosition = { x: 0, y: 0 };
-
-    globeRenderer.domElement.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        mouseDownPosition = { x: e.clientX, y: e.clientY };
-        stopAutoRotate();  // Stop auto-rotation on mouse down
+        updateGlobe();
     });
-
-    globeRenderer.domElement.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-            stopAutoRotate();  // Stop auto-rotation when dragging
-            const deltaX = e.clientX - previousMousePosition.x;
-            const deltaY = e.clientY - previousMousePosition.y;
-            
-            globeMesh.rotation.y += deltaX * 0.01;
-            globeMesh.rotation.x += deltaY * 0.01;
-            
-            // Hide popup when dragging (unless mouse is over popup)
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = null;
-            }
-            if (!isMouseOverPopup(e.clientX, e.clientY)) {
-                hideOverlappingMarkersPopup();
-            }
-        } else {
-            // Don't check if mouse is over popup
-            if (isMouseOverPopup(e.clientX, e.clientY)) {
-                return;
-            }
-            
-            // Clear previous timeout
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
-            }
-            
-            // Check for overlapping markers on hover after a short delay
-            hoverTimeout = setTimeout(() => {
-                // Double check mouse is not over popup before checking
-                if (!isMouseOverPopup(e.clientX, e.clientY)) {
-                    checkGlobeMarkerOverlaps(e.clientX, e.clientY);
-                }
-            }, 300); // 300ms delay to avoid flickering
-        }
-        previousMousePosition = { x: e.clientX, y: e.clientY };
-    });
-
-    globeRenderer.domElement.addEventListener('mouseup', (e) => {
-        stopAutoRotate();  // Stop auto-rotation on any mouse interaction
-        
-        // Check if it was a click (not a drag)
-        const dragDistance = Math.sqrt(
-            Math.pow(e.clientX - mouseDownPosition.x, 2) + 
-            Math.pow(e.clientY - mouseDownPosition.y, 2)
-        );
-        
-        if (dragDistance < 5) {
-            // It was a click, check for marker intersection
-            const mouse = new THREE.Vector2();
-            const rect = globeRenderer.domElement.getBoundingClientRect();
-            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(mouse, globeCamera);
-
-            // Check intersection with markers (check all children too)
-            const allMarkerObjects = [];
-            globeMarkers.forEach(markerGroup => {
-                allMarkerObjects.push(markerGroup);
-                markerGroup.children.forEach(child => allMarkerObjects.push(child));
-            });
-            
-            const intersects = raycaster.intersectObjects(allMarkerObjects, true);
-            if (intersects.length > 0) {
-                // Collect unique marker groups (not individual objects)
-                const uniqueMarkerGroups = new Set();
-                const clickedMarkers = [];
-                
-                intersects.forEach(intersect => {
-                    let obj = intersect.object;
-                    // Find the markerGroup (top-level parent with region data)
-                    while (obj) {
-                        // Check if this is a markerGroup (has region data and is in globeMarkers)
-                        if (obj.userData && obj.userData.region) {
-                            // Check if this is actually a markerGroup, not just a child
-                            const isMarkerGroup = globeMarkers.includes(obj);
-                            if (isMarkerGroup) {
-                                // This is a unique markerGroup
-                                if (!uniqueMarkerGroups.has(obj)) {
-                                    uniqueMarkerGroups.add(obj);
-                                    const region = obj.userData.region;
-                                    // Check if region already added
-                                    if (!clickedMarkers.find(m => m.region.region === region.region && m.region.cloud_provider === region.cloud_provider)) {
-                                        clickedMarkers.push({
-                                            markerGroup: obj,
-                                            region: region,
-                                            distance: intersect.distance
-                                        });
-                                    }
-                                }
-                                break;
-                            } else {
-                                // This is a child, find the parent markerGroup
-                                let parent = obj.parent;
-                                while (parent) {
-                                    if (globeMarkers.includes(parent)) {
-                                        if (!uniqueMarkerGroups.has(parent)) {
-                                            uniqueMarkerGroups.add(parent);
-                                            const region = parent.userData.region;
-                                            if (!clickedMarkers.find(m => m.region.region === region.region && m.region.cloud_provider === region.cloud_provider)) {
-                                                clickedMarkers.push({
-                                                    markerGroup: parent,
-                                                    region: region,
-                                                    distance: intersect.distance
-                                                });
-                                            }
-                                        }
-                                        break;
-                                    }
-                                    parent = parent.parent;
-                                }
-                                break;
-                            }
-                        }
-                        obj = obj.parent;
-                    }
-                });
-
-                if (clickedMarkers.length === 1) {
-                    // Single marker clicked, show info directly
-                    showRegionInfo(clickedMarkers[0].region);
-                } else if (clickedMarkers.length > 1) {
-                    // Multiple unique markers clicked, show popup
-                    showOverlappingMarkersPopup(clickedMarkers.map(m => m.region), e.clientX, e.clientY);
-                }
-            }
-        }
-        
-        isDragging = false;
-    });
-
-    globeRenderer.domElement.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        stopAutoRotate();  // Stop auto-rotation on wheel zoom
-        globeCamera.position.z += e.deltaY * 0.5;
-        globeCamera.position.z = Math.max(150, Math.min(500, globeCamera.position.z));
-    });
-
-    // Render loop with auto-rotation
-    function animate() {
-        requestAnimationFrame(animate);
-        
-        // Auto-rotation: 10 seconds per full rotation (360 degrees)
-        if (autoRotate && globeMesh) {
-            const currentTime = Date.now();
-            const deltaTime = (currentTime - lastAutoRotateTime) / 1000; // Convert to seconds
-            lastAutoRotateTime = currentTime;
-            
-            // Rotate 360 degrees in 10 seconds = 36 degrees per second = 0.628 radians per second
-            const rotationSpeed = (2 * Math.PI) / 10; // radians per second
-            globeMesh.rotation.y += rotationSpeed * deltaTime;
-        }
-        
-        // Update marker scales based on camera distance to keep them fixed size
-        const cameraDistance = globeCamera.position.z;
-        const baseDistance = 300; // Base camera distance
-        const scaleFactor = cameraDistance / baseDistance;
-        
-        globeMarkers.forEach(markerGroup => {
-            if (markerGroup.userData && markerGroup.userData.markerMesh) {
-                // Get base scale (1.0 for normal, 1.3 for selected - matching Map view hover effect)
-                const baseScale = markerGroup.userData.isSelected ? 1.3 : 1.0;
-                // Keep marker size constant regardless of camera distance
-                markerGroup.userData.markerMesh.scale.setScalar(baseScale * scaleFactor);
-            }
-        });
-        
-        globeRenderer.render(globeScene, globeCamera);
-    }
-    animate();
-
-    // Handle resize
-    window.addEventListener('resize', () => {
-        if (!container) return;
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        globeCamera.aspect = width / height;
-        globeCamera.updateProjectionMatrix();
-        globeRenderer.setSize(width, height);
-    });
-    
-    // Sync table column widths on window resize
-    window.addEventListener('resize', () => {
-        if (currentViewMode === 'table') {
-            setTimeout(syncTableColumnWidths, 100);
-        }
-    });
-
-    updateGlobe();
 }
 
 // Update Globe with markers
 function updateGlobe() {
-    if (!globeScene) return;
+    if (!currentGlobe) return;
+    currentGlobe.addMarkers(filteredRegions);
+    updateGlobeLegend();
+}
 
-    // Remove existing markers
-    globeMarkers.forEach(marker => {
-        globeMesh.remove(marker);
-    });
-    globeMarkers = [];
+// Handle Globe Click (from Globe implementation)
+function handleGlobeClick(intersects, clientX, clientY) {
+    const uniqueMarkerGroups = new Set();
+    const clickedRegions = [];
 
-    // Add markers for filtered regions
-    let markersAdded = 0;
-    let markersSkipped = 0;
-    
-    filteredRegions.forEach(region => {
-        const marker = createGlobeMarker(region);
-        if (marker) {
-            // Add marker as child of globeMesh so it rotates with the globe
-            globeMesh.add(marker);
-            globeMarkers.push(marker);
-            markersAdded++;
-        } else {
-            markersSkipped++;
+    intersects.forEach(intersect => {
+        let obj = intersect.object;
+        while (obj) {
+            // Check if this is a marker group (has region data)
+            if (obj.userData && obj.userData.region) {
+                 if (!uniqueMarkerGroups.has(obj)) {
+                     uniqueMarkerGroups.add(obj);
+                     const region = obj.userData.region;
+                     // Avoid duplicates
+                     if (!clickedRegions.find(r => r.region === region.region && r.cloud_provider === region.cloud_provider)) {
+                         clickedRegions.push(region);
+                     }
+                 }
+                 break;
+            }
+            obj = obj.parent;
         }
     });
 
-    // Update legend
-    updateGlobeLegend();
-
-    console.log(`Globe: Added ${markersAdded} markers, skipped ${markersSkipped} (missing/invalid coordinates)`);
+    if (clickedRegions.length === 1) {
+        showRegionInfo(clickedRegions[0]);
+    } else if (clickedRegions.length > 1) {
+        showOverlappingMarkersPopup(clickedRegions, clientX, clientY);
+    }
 }
 
 // Update Globe legend with cloud providers
@@ -838,61 +580,6 @@ function updateGlobeLegend() {
         `;
         legend.appendChild(item);
     });
-}
-
-// Create a marker on the globe
-function createGlobeMarker(region) {
-    // Validate coordinates
-    if (!region.latitude || !region.longitude) {
-        console.warn(`Region ${region.region} missing coordinates`);
-        return null;
-    }
-
-    // Validate coordinate ranges
-    if (region.latitude < -90 || region.latitude > 90 || 
-        region.longitude < -180 || region.longitude > 180) {
-        console.warn(`Region ${region.region} has invalid coordinates: ${region.latitude}, ${region.longitude}`);
-        return null;
-    }
-
-    // Convert lat/lng to 3D coordinates on sphere surface
-    const phi = (90 - region.latitude) * (Math.PI / 180);
-    const theta = (region.longitude + 180) * (Math.PI / 180);
-
-    const radius = 100; // Earth radius
-    const markerRadius = 100.5; // Slightly above surface for visibility
-    
-    const x = -(markerRadius * Math.sin(phi) * Math.cos(theta));
-    const y = markerRadius * Math.cos(phi);
-    const z = markerRadius * Math.sin(phi) * Math.sin(theta);
-
-    // Get cloud provider color configuration
-    const providerConfig = getCloudProviderConfig(region.cloud_provider);
-    const providerColor = providerConfig.color;
-    const darkerColor = providerColor * 0.7; // Darker shade for emissive
-
-    // Create marker group
-    const markerGroup = new THREE.Group();
-    markerGroup.userData = { region: region };
-    markerGroup.position.set(x, y, z);
-
-    // Main marker - simple sphere matching Map view style
-    // Map view uses 24px circle, so we use a similar size sphere
-    const markerSize = 2.5; // Adjusted to match visual size of 24px circle
-    const markerGeometry = new THREE.SphereGeometry(markerSize, 16, 16);
-    const markerMaterial = new THREE.MeshPhongMaterial({ 
-        color: providerColor,
-        emissive: darkerColor,
-        emissiveIntensity: 0.3,
-        shininess: 50
-    });
-    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-    markerGroup.add(marker);
-    
-    // Store reference for selection highlighting
-    markerGroup.userData.markerMesh = marker;
-
-    return markerGroup;
 }
 
 // Initialize Map view (AMap)
@@ -1225,13 +912,14 @@ function resetSelectedState() {
     });
 
     // Reset Globe markers
-    globeMarkers.forEach(markerGroup => {
-        if (markerGroup.userData && markerGroup.userData.markerMesh) {
-            markerGroup.userData.isSelected = false;
-            markerGroup.userData.markerMesh.material.emissiveIntensity = 0.5;
-            // Scale will be updated in animate loop based on camera distance
-        }
-    });
+    if (currentGlobe && currentGlobe.markers) {
+        currentGlobe.markers.forEach(markerGroup => {
+            if (markerGroup.userData && markerGroup.userData.markerMesh) {
+                markerGroup.userData.isSelected = false;
+                markerGroup.userData.markerMesh.material.emissiveIntensity = 0.5;
+            }
+        });
+    }
 
     // Reset Map markers (AMap)
     amapMarkers.forEach(marker => {
@@ -1327,26 +1015,27 @@ function updateSelectedState(region) {
     });
 
     // Update Globe markers - highlight selected
-    globeMarkers.forEach(markerGroup => {
-        if (markerGroup.userData && markerGroup.userData.region) {
-            const isSelected = markerGroup.userData.region.region === region.region &&
-                               markerGroup.userData.region.cloud_provider === region.cloud_provider;
-            
-            // Store selection state for scale calculation in animate loop
-            markerGroup.userData.isSelected = isSelected;
-            
-            if (markerGroup.userData.markerMesh) {
-                if (isSelected) {
-                    // Make selected marker brighter
-                    markerGroup.userData.markerMesh.material.emissiveIntensity = 1.0;
-                } else {
-                    // Reset to normal brightness
-                    markerGroup.userData.markerMesh.material.emissiveIntensity = 0.5;
+    if (currentGlobe && currentGlobe.markers) {
+        currentGlobe.markers.forEach(markerGroup => {
+            if (markerGroup.userData && markerGroup.userData.region) {
+                const isSelected = markerGroup.userData.region.region === region.region &&
+                                   markerGroup.userData.region.cloud_provider === region.cloud_provider;
+                
+                // Store selection state for scale calculation in animate loop
+                markerGroup.userData.isSelected = isSelected;
+                
+                if (markerGroup.userData.markerMesh) {
+                    if (isSelected) {
+                        // Make selected marker brighter
+                        markerGroup.userData.markerMesh.material.emissiveIntensity = 1.0;
+                    } else {
+                        // Reset to normal brightness
+                        markerGroup.userData.markerMesh.material.emissiveIntensity = 0.5;
+                    }
                 }
-                // Scale will be updated in animate loop based on camera distance
             }
-        }
-    });
+        });
+    }
 
     // Update Map markers - highlight selected
     amapMarkers.forEach(marker => {
@@ -1439,93 +1128,6 @@ function isMouseOverPopup(mouseX, mouseY) {
            mouseY >= rect.top && mouseY <= rect.bottom;
 }
 
-// Check for overlapping markers in Globe view
-function checkGlobeMarkerOverlaps(mouseX, mouseY) {
-    // Don't hide popup if mouse is over it
-    if (isMouseOverPopup(mouseX, mouseY)) {
-        return false;
-    }
-
-    const mouse = new THREE.Vector2();
-    const rect = globeRenderer.domElement.getBoundingClientRect();
-    mouse.x = ((mouseX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((mouseY - rect.top) / rect.height) * 2 + 1;
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, globeCamera);
-
-    const allMarkerObjects = [];
-    globeMarkers.forEach(markerGroup => {
-        allMarkerObjects.push(markerGroup);
-        markerGroup.children.forEach(child => allMarkerObjects.push(child));
-    });
-
-    const intersects = raycaster.intersectObjects(allMarkerObjects, true);
-    if (intersects.length > 0) {
-        // Collect unique marker groups (not individual objects)
-        const uniqueMarkerGroups = new Set();
-        const clickedRegions = [];
-        
-        intersects.forEach(intersect => {
-            let obj = intersect.object;
-            // Find the markerGroup (top-level parent with region data)
-            while (obj) {
-                // Check if this is a markerGroup (has region data and is in globeMarkers)
-                if (obj.userData && obj.userData.region) {
-                    // Check if this is actually a markerGroup, not just a child
-                    const isMarkerGroup = globeMarkers.includes(obj);
-                    if (isMarkerGroup) {
-                        // This is a unique markerGroup
-                        if (!uniqueMarkerGroups.has(obj)) {
-                            uniqueMarkerGroups.add(obj);
-                            const region = obj.userData.region;
-                            // Check if region already added
-                            if (!clickedRegions.find(r => r.region === region.region && r.cloud_provider === region.cloud_provider)) {
-                                clickedRegions.push(region);
-                            }
-                        }
-                        break;
-                    } else {
-                        // This is a child, find the parent markerGroup
-                        let parent = obj.parent;
-                        while (parent) {
-                            if (globeMarkers.includes(parent)) {
-                                if (!uniqueMarkerGroups.has(parent)) {
-                                    uniqueMarkerGroups.add(parent);
-                                    const region = parent.userData.region;
-                                    if (!clickedRegions.find(r => r.region === region.region && r.cloud_provider === region.cloud_provider)) {
-                                        clickedRegions.push(region);
-                                    }
-                                }
-                                break;
-                            }
-                            parent = parent.parent;
-                        }
-                        break;
-                    }
-                }
-                obj = obj.parent;
-            }
-        });
-
-        if (clickedRegions.length > 1) {
-            // Multiple unique markers, show popup
-            showOverlappingMarkersPopup(clickedRegions, mouseX, mouseY);
-            return true;
-        } else {
-            // Only hide if mouse is not over popup
-            if (!isMouseOverPopup(mouseX, mouseY)) {
-                hideOverlappingMarkersPopup();
-            }
-        }
-    } else {
-        // Only hide if mouse is not over popup
-        if (!isMouseOverPopup(mouseX, mouseY)) {
-            hideOverlappingMarkersPopup();
-        }
-    }
-    return false;
-}
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', init);
+

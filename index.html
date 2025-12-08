@@ -9,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- 高德地图配置 -->
     <script src="config.js"></script>
+    <!-- Globe Implementations -->
+    <script src="globe-impl.js"></script>
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 </head>
@@ -57,6 +59,12 @@
                 <!-- Globe View -->
                 <div id="globe-view" class="view-container active">
                     <div id="globe-canvas"></div>
+                    <div class="globe-overlay-control">
+                        <select id="globeStyleSelect" class="globe-style-select" aria-label="Select Globe Style">
+                            <option value="classic">Classic</option>
+                            <option value="github">GitHub</option>
+                        </select>
+                    </div>
                     <div id="globe-loading" class="globe-loading">
                         <div class="loading-spinner"></div>
                         <div class="loading-text" data-i18n="loading_map">地图资源加载中...</div>

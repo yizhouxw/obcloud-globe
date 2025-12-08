@@ -2,140 +2,200 @@ regions:
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 中国 (香港)
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2024-10-21'
+  availability_zones:
+  - ap-east-1a
+  - ap-east-1b
+  - ap-east-1c
   channels:
   - 云市场
   - 自运营
   latitude: 22.3193
   longitude: 114.1694
+  region_code: ap-east-1
 - cloud_provider: AWS
   obcloud_site: 中国站
   region: 北京
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2025-03-14'
+  availability_zones:
+  - cn-north-1a
+  - cn-north-1b
+  - cn-north-1d
   channels:
   - 云市场
   - 自运营
   latitude: 39.9042
   longitude: 116.4074
+  region_code: cn-north-1
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 印尼 (雅加达)
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2024-10-21'
+  availability_zones:
+  - ap-southeast-3a
+  - ap-southeast-3b
+  - ap-southeast-3c
   channels:
   - 云市场
   - 自运营
   latitude: -6.2088
   longitude: 106.8456
+  region_code: ap-southeast-3
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 印度 (孟买)
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2024-10-21'
+  availability_zones:
+  - ap-south-1a
+  - ap-south-1b
+  - ap-south-1c
   channels:
   - 云市场
   - 自运营
   latitude: 19.076
   longitude: 72.8777
+  region_code: ap-south-1
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 巴西 （圣保罗）
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2025-05-25'
+  availability_zones:
+  - sa-east-1a
+  - sa-east-1b
+  - sa-east-1c
   channels:
   - 云市场
   - 自运营
   latitude: -23.5505
   longitude: -46.6333
+  region_code: sa-east-1
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 德国 (法兰克福)
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2024-10-21'
+  availability_zones:
+  - eu-central-1a
+  - eu-central-1b
+  - eu-central-1c
   channels:
   - 云市场
   - 自运营
   latitude: 50.1109
   longitude: 8.6821
+  region_code: eu-central-1
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 新加坡
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2024-10-21'
+  availability_zones:
+  - ap-southeast-1a
+  - ap-southeast-1b
+  - ap-southeast-1c
   channels:
   - 云市场
   - 自运营
   latitude: 1.3521
   longitude: 103.8198
+  region_code: ap-southeast-1
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 日本 (东京)
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2024-10-21'
+  availability_zones:
+  - ap-northeast-1a
+  - ap-northeast-1c
+  - ap-northeast-1d
   channels:
   - 云市场
   - 自运营
   latitude: 35.6762
   longitude: 139.6503
+  region_code: ap-northeast-1
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 法国 （巴黎）
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2025-07-23'
+  availability_zones:
+  - eu-west-3a
+  - eu-west-3b
+  - eu-west-3c
   channels:
   - 云市场
   - 自运营
   latitude: 48.8566
   longitude: 2.3522
+  region_code: eu-west-3
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 美国 (俄勒冈)
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2024-10-21'
+  availability_zones:
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
+  - us-west-2d
   channels:
   - 云市场
   - 自运营
   latitude: 45.5152
   longitude: -122.6784
+  region_code: us-west-2
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 美国 (弗吉尼亚)
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2024-10-21'
+  availability_zones:
+  - us-east-1a
+  - us-east-1b
+  - us-east-1c
+  - us-east-1d
+  - us-east-1e
+  - us-east-1f
   channels:
   - 云市场
   - 自运营
   latitude: 38.9072
   longitude: -77.0369
+  region_code: us-east-1
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 美国 (美西-加州北)
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2024-10-21'
+  availability_zones:
+  - us-west-1a
+  - us-west-1b
+  - us-west-1c
   channels:
   - 云市场
   - 自运营
   latitude: 37.7749
   longitude: -122.4194
+  region_code: us-west-1
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 美国 （俄亥俄）
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2025-06-12'
+  availability_zones:
+  - us-east-2a
+  - us-east-2b
+  - us-east-2c
   channels:
   - 云市场
   - 自运营
   latitude: 39.9612
   longitude: -82.9988
+  region_code: us-east-2
 - cloud_provider: AWS
   obcloud_site: 国际站
   region: 马来西亚 （吉隆坡）
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2025-02-11'
+  availability_zones:
+  - ap-southeast-5a
+  - ap-southeast-5b
+  - ap-southeast-5c
   channels:
   - 云市场
   - 自运营
   latitude: 3.139
   longitude: 101.6869
+  region_code: ap-southeast-5
