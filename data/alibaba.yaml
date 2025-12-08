@@ -2,90 +2,73 @@ regions:
 - cloud_provider: 阿里云
   obcloud_site: 中国站
   region: '[政]华北2'
-  launch_date: 待补充
-  availability_zones: 待补充
+  launch_date: '2025-03-18'
+  availability_zones:
+  - cn-north-2-gov-1a
+  - cn-north-2-gov-1b
+  - cn-north-2-gov-1c
+  - cn-north-2-gov-1d
+  - cn-north-2-gov-1e
   channels:
   - 官网渠道
   latitude: 39.9042
   longitude: 116.4074
+  region_code: cn-north-2-gov-1
 - cloud_provider: 阿里云
   obcloud_site:
   - 中国站
   - 国际站
   region: '[金]华东1 (杭州)'
-  launch_date: '2024-10-19'
+  launch_date: '2025-06-24'
   availability_zones:
   - cn-hangzhou-b
   - cn-hangzhou-d
-  - cn-hangzhou-e
-  - cn-hangzhou-f
-  - cn-hangzhou-g
-  - cn-hangzhou-h
-  - cn-hangzhou-i
-  - cn-hangzhou-j
-  - cn-hangzhou-k
+  - cn-hangzhou-finance-h
+  - cn-hangzhou-finance-i
+  - cn-hangzhou-finance-j
+  - cn-hangzhou-finance-k
   channels:
   - 官网渠道
   latitude: 30.2741
   longitude: 120.1551
+  region_code: cn-hangzhou-finance
 - cloud_provider: 阿里云
   obcloud_site:
   - 中国站
   - 国际站
   region: '[金]华东2 (上海)'
-  launch_date: '2024-10-18'
+  launch_date: '2025-03-18'
   availability_zones:
-  - cn-shanghai-a
-  - cn-shanghai-b
-  - cn-shanghai-c
-  - cn-shanghai-d
-  - cn-shanghai-e
-  - cn-shanghai-f
-  - cn-shanghai-g
-  - cn-shanghai-h
-  - cn-shanghai-i
-  - cn-shanghai-j
-  - cn-shanghai-k
-  - cn-shanghai-l
-  - cn-shanghai-m
-  - cn-shanghai-n
+  - cn-shanghai-finance-1a
+  - cn-shanghai-finance-1b
+  - cn-shanghai-finance-1f
+  - cn-shanghai-finance-1g
+  - cn-shanghai-finance-1k
+  - cn-shanghai-finance-1z
   channels:
   - 官网渠道
   - 精选商城
   latitude: 31.2304
   longitude: 121.4737
+  region_code: cn-shanghai-finance-1
 - cloud_provider: 阿里云
   obcloud_site: 中国站
   region: '[金]华北2 (北京)'
-  launch_date: '2024-10-18'
+  launch_date: '2025-04-03'
   availability_zones:
-  - cn-beijing-a
-  - cn-beijing-b
-  - cn-beijing-c
-  - cn-beijing-d
-  - cn-beijing-e
-  - cn-beijing-f
-  - cn-beijing-g
-  - cn-beijing-h
-  - cn-beijing-i
-  - cn-beijing-j
-  - cn-beijing-k
-  - cn-beijing-l
+  - cn-beijing-finance-1f
+  - cn-beijing-finance-1k
+  - cn-beijing-finance-1l
   channels:
   - 官网渠道
   latitude: 39.9042
   longitude: 116.4074
+  region_code: cn-beijing-finance-1
 - cloud_provider: 阿里云
   obcloud_site: 中国站
   region: '[金]华南1 (深圳)'
-  launch_date: '2025-04-14'
-  availability_zones:
-  - cn-shenzhen-a
-  - cn-shenzhen-b
-  - cn-shenzhen-c
-  - cn-shenzhen-d
-  - cn-shenzhen-e
-  - cn-shenzhen-f
+  launch_date: 待补充
+  availability_zones: 待补充
   channels:
   - 官网渠道
   latitude: 22.5431
