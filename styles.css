@@ -92,7 +92,7 @@ header h1 {
 }
 
 .github-link {
-    position: absolute;
+    position: fixed;
     top: var(--spacing-lg);
     right: var(--spacing-xl);
     color: var(--text-white);
@@ -106,13 +106,13 @@ header h1 {
     transition: all 0.2s ease;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
-    z-index: 20;
+    z-index: 999;
 }
 
 .github-link:hover {
     opacity: 1;
     background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .github-link svg {
