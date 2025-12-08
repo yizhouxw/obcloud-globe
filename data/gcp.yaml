@@ -59,3 +59,13 @@ regions:
   - 自运营
   latitude: 38.9072
   longitude: -77.0369
+- cloud_provider: GCP
+  obcloud_site: 国际站
+  region: 德国 (法兰克福)
+  launch_date: 2025-12-05
+  availability_zones: 待补充
+  channels:
+  - 云市场
+  - 自运营
+  latitude: 50.1109
+  longitude: 8.6821
