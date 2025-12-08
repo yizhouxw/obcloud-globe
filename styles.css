@@ -81,8 +81,39 @@ header {
 
 header h1 {
     font-size: 2rem;
-    margin-bottom: var(--spacing-md);
     font-weight: 600;
+}
+
+.header-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.github-link {
+    color: var(--text-white);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.github-link:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.github-link svg {
+    fill: currentColor;
 }
 
 .header-controls {
