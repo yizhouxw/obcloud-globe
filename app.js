@@ -161,6 +161,8 @@ async function loadRegionsData() {
                 }
                 const yamlText = await response.text();
                 const data = jsyaml.load(yamlText);
+                // Ensure region_code is present if not parsed correctly or missing
+                // (Though if it is in YAML, it should be parsed)
                 return data || { regions: [] };
             } catch (error) {
                 console.warn(`Error loading ${file}:`, error);
@@ -789,11 +791,12 @@ function updateMap() {
 
 // Create popup content for map markers
 function createPopupContent(region) {
+    const azCount = Array.isArray(region.availability_zones) ? region.availability_zones.length : (region.availability_zones || '-');
     return `
         <div style="min-width: 200px;">
             <h3 style="margin: 0 0 0.5rem 0; color: #667eea;">${t(region.region)}</h3>
             <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>${t('label_provider')}:</strong> ${t(region.cloud_provider)}</p>
-            <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>${t('label_az')}:</strong> ${t(region.availability_zones)}</p>
+            <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>${t('label_az')}:</strong> ${azCount}</p>
             <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>${t('label_date')}:</strong> ${t(region.launch_date)}</p>
         </div>
     `;
@@ -871,11 +874,15 @@ function updateTable() {
             ? sites.map(site => `<span class="channel-tag">${t(site)}</span>`).join('')
             : '-';
 
+        const azCount = Array.isArray(region.availability_zones) ? region.availability_zones.length : (region.availability_zones || '-');
+        const azList = Array.isArray(region.availability_zones) ? region.availability_zones.join(', ') : (region.availability_zones || '-');
+
         row.innerHTML = `
             <td>${t(region.cloud_provider)}</td>
             <td>${t(region.region)}</td>
             <td>${region.region_code || '-'}</td>
-            <td>${t(region.availability_zones)}</td>
+            <td>${azCount}</td>
+            <td>${azList}</td>
             <td>${t(region.launch_date)}</td>
             <td><div class="channels">${channelsHtml}</div></td>
             <td>${sites.length > 0 ? `<div class="channels">${sitesHtml}</div>` : '-'}</td>
@@ -972,8 +979,14 @@ function showRegionInfo(region) {
         </div>
         <div class="info-item">
             <label>${t('label_az')}</label>
-            <div class="value">${t(region.availability_zones)}</div>
+            <div class="value">${Array.isArray(region.availability_zones) ? region.availability_zones.length : t(region.availability_zones || '-')}</div>
         </div>
+        ${(Array.isArray(region.availability_zones) || region.availability_zones) ? `
+        <div class="info-item">
+            <label>${t('label_az_list')}</label>
+            <div class="value">${Array.isArray(region.availability_zones) ? region.availability_zones.join(', ') : t(region.availability_zones)}</div>
+        </div>
+        ` : ''}
         <div class="info-item">
             <label>${t('label_date')}</label>
             <div class="value">${t(region.launch_date)}</div>

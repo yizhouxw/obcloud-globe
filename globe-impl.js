@@ -399,7 +399,15 @@ class GithubGlobe extends BaseGlobe {
             });
         });
 
-        const geoJsonPromise = fetch('assets/github-globe/globe-data-min.json').then(r => r.json());
+        const geoJsonPromise = fetch('assets/github-globe/globe-data-min.json')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .catch(e => {
+                console.error("Failed to load GeoJSON:", e);
+                return null;
+            });
 
         const [texture, geoJson] = await Promise.all([texturePromise, geoJsonPromise]);
 
@@ -426,9 +434,9 @@ class GithubGlobe extends BaseGlobe {
 
     addGeoJsonFeatures(geoJson) {
         const lineMaterial = new THREE.LineBasicMaterial({ 
-            color: 0x334455, // Subtle line color
+            color: 0x88ccff, // Brighter blue-cyan
             transparent: true,
-            opacity: 0.5 
+            opacity: 0.8 
         });
 
         // Helper to process polygon rings
