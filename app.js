@@ -972,6 +972,9 @@ function showRegionInfo(region) {
         return;
     }
 
+    // Ensure any overlapping popup is hidden whenever a region is selected
+    hideOverlappingMarkersPopup();
+
     selectedRegion = region;
     const content = document.getElementById('region-info-content');
 
