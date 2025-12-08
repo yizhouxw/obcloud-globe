@@ -287,17 +287,11 @@ function setupEventListeners() {
         });
         
         popup.addEventListener('mouseleave', (e) => {
-            // Only hide if mouse is not moving to a marker
-            const relatedTarget = e.relatedTarget;
-            if (relatedTarget && !relatedTarget.closest('.custom-marker') && 
-                !relatedTarget.closest('#globe-canvas')) {
-                // Small delay before hiding to allow moving back
-                setTimeout(() => {
-                    if (!isMouseOverPopup(e.clientX, e.clientY)) {
-                        hideOverlappingMarkersPopup();
-                    }
-                }, 200);
-            }
+            // Schedule hide when mouse leaves the popup
+            if (hoverTimeout) clearTimeout(hoverTimeout);
+            hoverTimeout = setTimeout(() => {
+                hideOverlappingMarkersPopup();
+            }, 300);
         });
     }
 }
@@ -701,6 +695,12 @@ function updateMap() {
         
         // Add hover effect
         markerContent.addEventListener('mouseenter', () => {
+            // Cancel any pending popup hide
+            if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = null;
+            }
+
             markerContent.style.transform = 'scale(1.3)';
             markerContent.style.boxShadow = `0 4px 12px ${providerColorHex}80`;
             
@@ -731,7 +731,15 @@ function updateMap() {
         markerContent.addEventListener('mouseleave', () => {
             markerContent.style.transform = 'scale(1)';
             markerContent.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-            // Don't hide popup on mouseleave - let user click on it or click outside to close
+            
+            // If popup is visible, schedule hide
+            const popup = document.getElementById('overlapping-markers-popup');
+            if (popup && !popup.classList.contains('hidden')) {
+                if (hoverTimeout) clearTimeout(hoverTimeout);
+                hoverTimeout = setTimeout(() => {
+                    hideOverlappingMarkersPopup();
+                }, 300);
+            }
         });
         
         // Create marker
