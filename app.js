@@ -701,6 +701,20 @@ function updateMap() {
                 hoverTimeout = null;
             }
 
+            // Check if we need to close an existing popup from a DIFFERENT group
+            const popup = document.getElementById('overlapping-markers-popup');
+            if (popup && !popup.classList.contains('hidden') && popup.dataset.activeRegions) {
+                try {
+                    const activeRegions = JSON.parse(popup.dataset.activeRegions);
+                    const currentId = `${region.cloud_provider}:${region.region}`;
+                    if (!activeRegions.includes(currentId)) {
+                        hideOverlappingMarkersPopup();
+                    }
+                } catch (e) {
+                    // ignore parse error
+                }
+            }
+
             markerContent.style.transform = 'scale(1.3)';
             markerContent.style.boxShadow = `0 4px 12px ${providerColorHex}80`;
             
@@ -785,6 +799,8 @@ function updateMap() {
             } else {
                 // Single marker, show info directly
                 showRegionInfo(region);
+                // Ensure any overlapping popup is hidden
+                hideOverlappingMarkersPopup();
             }
         });
 
@@ -1092,6 +1108,9 @@ function showOverlappingMarkersPopup(regions, x, y) {
     list.innerHTML = '';
 
     // Add marker items
+    const regionIds = regions.map(r => `${r.cloud_provider}:${r.region}`);
+    popup.dataset.activeRegions = JSON.stringify(regionIds);
+
     regions.forEach(region => {
         const providerConfig = getCloudProviderConfig(region.cloud_provider);
         const providerColorHex = '#' + providerConfig.color.toString(16).padStart(6, '0');
