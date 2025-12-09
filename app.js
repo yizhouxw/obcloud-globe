@@ -436,6 +436,36 @@ function getObcloudSites(region) {
     return [region.obcloud_site];
 }
 
+// Format AZ code by stripping region_code-related prefixes.
+// Handles finance regions where AZs may omit the "finance" segment:
+//   region_code: cn-hangzhou-finance, az: cn-hangzhou-b -> b
+//   region_code: cn-shanghai-finance-1, az: cn-shanghai-1a -> 1a
+function formatAzName(region, az) {
+    if (!az || !region || !region.region_code) return az;
+
+    const prefixes = new Set();
+    const rc = region.region_code;
+    prefixes.add(rc);
+
+    // Try removing "-finance" and "-finance-" variants to cover special AZ coding
+    if (rc.includes('finance')) {
+        prefixes.add(rc.replace('-finance-', '-'));
+        prefixes.add(rc.replace('-finance', ''));
+    }
+
+    for (const prefix of prefixes) {
+        if (az.startsWith(prefix)) {
+            let name = az.slice(prefix.length);
+            while (name.startsWith('-')) {
+                name = name.slice(1);
+            }
+            return name || az;
+        }
+    }
+
+    return az;
+}
+
 // Initialize filter dropdowns
 function initializeFilters() {
     // Save current selections if any
@@ -1033,7 +1063,11 @@ function updateTable() {
 
         const isOffline = region.is_offline === true;
         const azCount = isOffline ? '-' : (Array.isArray(region.availability_zones) ? region.availability_zones.length : t(region.availability_zones || '-'));
-        const azList = isOffline ? '' : (Array.isArray(region.availability_zones) ? region.availability_zones.join(', ') : t(region.availability_zones || '-'));
+        const azList = isOffline ? '' : (
+            Array.isArray(region.availability_zones) 
+                ? region.availability_zones.map(az => formatAzName(region, az)).join(', ')
+                : t(region.availability_zones || '-')
+        );
         const launchDate = isOffline ? '已下线' : t(region.launch_date);
 
         row.innerHTML = `
@@ -1146,7 +1180,7 @@ function showRegionInfo(region) {
         ${(Array.isArray(region.availability_zones) || region.availability_zones) ? `
         <div class="info-item">
             <label>${t('label_az_list')}</label>
-            <div class="value">${Array.isArray(region.availability_zones) ? region.availability_zones.join(', ') : t(region.availability_zones)}</div>
+            <div class="value">${Array.isArray(region.availability_zones) ? region.availability_zones.map(az => formatAzName(region, az)).join(', ') : t(region.availability_zones)}</div>
         </div>
         ` : ''}
         <div class="info-item">
