@@ -2,8 +2,9 @@ regions:
 - cloud_provider: GCP
   obcloud_site: 国际站
   region: 中国 (香港)
-  launch_date: 待补充
-  availability_zones: 待补充
+  is_offline: true
+  launch_date: 已下线
+  availability_zones: []
   channels:
   - 云市场
   - 自运营
@@ -20,9 +21,9 @@ regions:
   channels:
   - 云市场
   - 自运营
+  region_code: asia-southeast2
   latitude: -6.2088
   longitude: 106.8456
-  region_code: asia-southeast2
 - cloud_provider: GCP
   obcloud_site: 国际站
   region: 新加坡
@@ -34,9 +35,9 @@ regions:
   channels:
   - 云市场
   - 自运营
+  region_code: asia-southeast1
   latitude: 1.3521
   longitude: 103.8198
-  region_code: asia-southeast1
 - cloud_provider: GCP
   obcloud_site: 国际站
   region: 日本 (东京)
@@ -48,9 +49,9 @@ regions:
   channels:
   - 云市场
   - 自运营
+  region_code: asia-northeast1
   latitude: 35.6762
   longitude: 139.6503
-  region_code: asia-northeast1
 - cloud_provider: GCP
   obcloud_site: 国际站
   region: 美国 (俄勒冈)
@@ -62,14 +63,15 @@ regions:
   channels:
   - 云市场
   - 自运营
+  region_code: us-west1
   latitude: 45.5152
   longitude: -122.6784
-  region_code: us-west1
 - cloud_provider: GCP
   obcloud_site: 国际站
   region: 美国 (弗吉尼亚)
-  launch_date: 待补充
-  availability_zones: 待补充
+  is_offline: true
+  launch_date: 已下线
+  availability_zones: []
   channels:
   - 云市场
   - 自运营

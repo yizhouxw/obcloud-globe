@@ -636,8 +636,9 @@ function initGlobe(force = false) {
 // Update Globe with markers
 function updateGlobe() {
     if (!currentGlobe) return;
-    currentGlobe.addMarkers(filteredRegions);
-    updateGlobeLegend();
+    const activeRegions = filteredRegions.filter(region => !region.is_offline);
+    currentGlobe.addMarkers(activeRegions);
+    updateGlobeLegend(activeRegions);
 }
 
 // Handle Globe Click (from Globe implementation)
@@ -672,12 +673,12 @@ function handleGlobeClick(intersects, clientX, clientY) {
 }
 
 // Update Globe legend with cloud providers
-function updateGlobeLegend() {
+function updateGlobeLegend(regions = filteredRegions) {
     const legend = document.getElementById('globe-legend');
-    if (!legend || filteredRegions.length === 0) return;
+    if (!legend || regions.length === 0) return;
 
     // Get unique cloud providers from filtered regions
-    const providers = [...new Set(filteredRegions.map(r => r.cloud_provider))].sort();
+    const providers = [...new Set(regions.map(r => r.cloud_provider))].sort();
     
     // Clear existing legend items
     legend.innerHTML = '';
@@ -783,7 +784,10 @@ function updateMap() {
     let markersAdded = 0;
     let markersSkipped = 0;
 
-    filteredRegions.forEach(region => {
+    const activeRegions = filteredRegions.filter(region => !region.is_offline);
+    const offlineCount = filteredRegions.length - activeRegions.length;
+
+    activeRegions.forEach(region => {
         // Validate coordinates
         if (!region.latitude || !region.longitude) {
             console.warn(`Region ${region.region} missing coordinates`);
@@ -917,7 +921,7 @@ function updateMap() {
         markersAdded++;
     });
 
-    console.log(`Map: Added ${markersAdded} markers, skipped ${markersSkipped} (missing/invalid coordinates)`);
+    console.log(`Map: Added ${markersAdded} markers, skipped ${markersSkipped} (missing/invalid coordinates), filtered offline: ${offlineCount}`);
 }
 
 // Create popup content for map markers
@@ -1017,7 +1021,8 @@ function updateTable() {
             }
         });
 
-        const channelsHtml = region.channels.map(ch => 
+        const channels = Array.isArray(region.channels) ? region.channels : [];
+        const channelsHtml = channels.map(ch => 
             `<span class="channel-tag">${t(ch)}</span>`
         ).join('');
         
@@ -1026,8 +1031,10 @@ function updateTable() {
             ? sites.map(site => `<span class="channel-tag">${t(site)}</span>`).join('')
             : '-';
 
-        const azCount = Array.isArray(region.availability_zones) ? region.availability_zones.length : t(region.availability_zones || '-');
-        const azList = Array.isArray(region.availability_zones) ? region.availability_zones.join(', ') : t(region.availability_zones || '-');
+        const isOffline = region.is_offline === true;
+        const azCount = isOffline ? '-' : (Array.isArray(region.availability_zones) ? region.availability_zones.length : t(region.availability_zones || '-'));
+        const azList = isOffline ? '' : (Array.isArray(region.availability_zones) ? region.availability_zones.join(', ') : t(region.availability_zones || '-'));
+        const launchDate = isOffline ? '已下线' : t(region.launch_date);
 
         row.innerHTML = `
             <td>${t(region.cloud_provider)}</td>
@@ -1035,7 +1042,7 @@ function updateTable() {
             <td>${region.region_code || '-'}</td>
             <td>${azCount}</td>
             <td>${azList}</td>
-            <td>${t(region.launch_date)}</td>
+            <td>${launchDate}</td>
             <td><div class="channels">${channelsHtml}</div></td>
             <td>${sites.length > 0 ? `<div class="channels">${sitesHtml}</div>` : '-'}</td>
         `;
@@ -1158,12 +1165,6 @@ function showRegionInfo(region) {
                 ${sites.length > 0 ? `<div class="channels">${sitesHtml}</div>` : '-'}
             </div>
         </div>
-        ${region.latitude && region.longitude ? `
-        <div class="info-item">
-            <label>${t('label_coords')}</label>
-            <div class="value">${region.latitude.toFixed(4)}, ${region.longitude.toFixed(4)}</div>
-        </div>
-        ` : ''}
     `;
 
     // Render to sidebar (desktop) or modal (mobile / sidebar hidden)

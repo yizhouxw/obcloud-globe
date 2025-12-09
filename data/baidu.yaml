@@ -10,9 +10,9 @@ regions:
   - cn-bd-d
   channels:
   - 官网渠道
+  region_code: cn-bd
   latitude: 38.851
   longitude: 115.49
-  region_code: cn-bd
 - cloud_provider: 百度云
   obcloud_site: 中国站
   region: 北京
@@ -27,9 +27,9 @@ regions:
   - cn-bj-i
   channels:
   - 官网渠道
+  region_code: cn-bj
   latitude: 39.9042
   longitude: 116.4074
-  region_code: cn-bj
 - cloud_provider: 百度云
   obcloud_site: 中国站
   region: 武汉
@@ -39,6 +39,6 @@ regions:
   - cn-fwh-b
   channels:
   - 官网渠道
+  region_code: cn-fwh
   latitude: 30.5928
   longitude: 114.3055
-  region_code: cn-fwh

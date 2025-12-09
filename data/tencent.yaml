@@ -12,9 +12,9 @@ regions:
   - ap-shanghai-8
   channels:
   - 自运营
+  region_code: ap-shanghai
   latitude: 31.2304
   longitude: 121.4737
-  region_code: ap-shanghai
 - cloud_provider: 腾讯云
   obcloud_site: 中国站
   region: 北京
@@ -30,9 +30,9 @@ regions:
   - ap-beijing-cdz-haerbindianxin-1
   channels:
   - 自运营
+  region_code: ap-beijing
   latitude: 39.9042
   longitude: 116.4074
-  region_code: ap-beijing
 - cloud_provider: 腾讯云
   obcloud_site: 中国站
   region: 广州
@@ -45,21 +45,20 @@ regions:
   - ap-guangzhou-7
   channels:
   - 自运营
+  region_code: ap-guangzhou
   latitude: 23.1291
   longitude: 113.2644
-  region_code: ap-guangzhou
 - cloud_provider: 腾讯云
   obcloud_site: 中国站
   region: 成都
-  launch_date: '2024-10-18'
-  availability_zones:
-  - ap-chengdu-1
-  - ap-chengdu-2
+  is_offline: true
+  launch_date: 已下线
+  availability_zones: []
   channels:
   - 自运营
+  region_code: ap-chengdu
   latitude: 30.6624
   longitude: 104.0633
-  region_code: ap-chengdu
 - cloud_provider: 腾讯云
   obcloud_site: 中国站
   region: 新加坡
@@ -70,6 +69,6 @@ regions:
   - ap-singapore-4
   channels:
   - 自运营
+  region_code: ap-singapore
   latitude: 1.3521
   longitude: 103.8198
-  region_code: ap-singapore
