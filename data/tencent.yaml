@@ -50,17 +50,6 @@ regions:
   longitude: 113.2644
 - cloud_provider: 腾讯云
   obcloud_site: 中国站
-  region: 成都
-  is_offline: true
-  launch_date: 已下线
-  availability_zones: []
-  channels:
-  - 自运营
-  region_code: ap-chengdu
-  latitude: 30.6624
-  longitude: 104.0633
-- cloud_provider: 腾讯云
-  obcloud_site: 中国站
   region: 新加坡
   launch_date: '2025-04-23'
   availability_zones:

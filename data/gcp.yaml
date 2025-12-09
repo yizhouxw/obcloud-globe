@@ -1,17 +1,6 @@
 regions:
 - cloud_provider: GCP
   obcloud_site: 国际站
-  region: 中国 (香港)
-  is_offline: true
-  launch_date: 已下线
-  availability_zones: []
-  channels:
-  - 云市场
-  - 自运营
-  latitude: 22.3193
-  longitude: 114.1694
-- cloud_provider: GCP
-  obcloud_site: 国际站
   region: 印尼 (雅加达)
   launch_date: '2024-10-21'
   availability_zones:
@@ -66,14 +55,3 @@ regions:
   region_code: us-west1
   latitude: 45.5152
   longitude: -122.6784
-- cloud_provider: GCP
-  obcloud_site: 国际站
-  region: 美国 (弗吉尼亚)
-  is_offline: true
-  launch_date: 已下线
-  availability_zones: []
-  channels:
-  - 云市场
-  - 自运营
-  latitude: 38.9072
-  longitude: -77.0369

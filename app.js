@@ -153,6 +153,27 @@ function getLegendLabel(provider) {
     return label;
 }
 
+// Dismissible notice banner (session only, reappears on reload)
+function dismissNoticeBanner() {
+    const banner = document.getElementById('notice-banner');
+    if (!banner) return;
+    banner.classList.add('notice-hidden');
+}
+
+function setupNoticeBanner() {
+    const banner = document.getElementById('notice-banner');
+    const closeBtn = document.getElementById('notice-banner-close');
+    if (!banner || !closeBtn) return;
+
+    closeBtn.addEventListener('click', dismissNoticeBanner);
+    closeBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            dismissNoticeBanner();
+        }
+    });
+}
+
 // Initialize application
 async function init() {
     // Load map script with current language
@@ -161,6 +182,7 @@ async function init() {
     // Initialize translations
     updatePageText();
 
+    setupNoticeBanner();
     await loadRegionsData();
     setupRegionModal();
     setupEventListeners();

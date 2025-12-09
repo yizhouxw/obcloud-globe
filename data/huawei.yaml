@@ -61,15 +61,14 @@ regions:
   latitude: 23.1291
   longitude: 113.2644
 - cloud_provider: 华为云
-  obcloud_site:
-  - 中国站
-  - 国际站
+  obcloud_site: 中国站
   region: 新加坡
-  is_offline: true
-  launch_date: 已下线
-  availability_zones: []
+  launch_date: '2025-03-26'
+  availability_zones:
+  - ap-southeast-3a
+  - ap-southeast-3b
+  - ap-southeast-3c
   channels:
-  - 云市场
   - 联营联运
   - 自运营
   region_code: ap-southeast-3
@@ -89,17 +88,6 @@ regions:
   region_code: cn-east-4
   latitude: 31.3529
   longitude: 118.3765
-- cloud_provider: 华为云
-  obcloud_site: 国际站
-  region: 菲律宾 （马尼拉）
-  is_offline: true
-  launch_date: 已下线
-  availability_zones: []
-  channels:
-  - 云市场
-  - 自运营
-  latitude: 14.5995
-  longitude: 120.9842
 - cloud_provider: 华为云
   obcloud_site: 中国站
   region: 青岛

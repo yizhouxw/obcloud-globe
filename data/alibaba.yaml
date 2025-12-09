@@ -65,16 +65,6 @@ regions:
   latitude: 39.9042
   longitude: 116.4074
 - cloud_provider: 阿里云
-  obcloud_site: 中国站
-  region: '[金]华南1 (深圳)'
-  is_offline: true
-  launch_date: 已下线
-  availability_zones: []
-  channels:
-  - 官网渠道
-  latitude: 22.5431
-  longitude: 114.0579
-- cloud_provider: 阿里云
   obcloud_site:
   - 中国站
   - 国际站
@@ -232,17 +222,6 @@ regions:
   region_code: ap-southeast-1
   latitude: 1.3521
   longitude: 103.8198
-- cloud_provider: 阿里云
-  obcloud_site: 中国站
-  region: 日本 (东京)
-  is_offline: true
-  launch_date: 已下线
-  availability_zones: []
-  channels:
-  - 精选商城
-  - 自运营
-  latitude: 35.6762
-  longitude: 139.6503
 - cloud_provider: 阿里云
   obcloud_site:
   - 中国站

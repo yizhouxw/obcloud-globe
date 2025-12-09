@@ -1,6 +1,10 @@
 const translations = {
     'zh': {
         'app_title': 'OB Cloud 全球地域分布',
+        'site_disclaimer_prefix': '本站点非 OceanBase 官方站点，通过开源社区维护，站长会尽力保证，但是不确保数据完整准确，您可以通过 ',
+        'site_disclaimer_link': 'GitHub issues',
+        'site_disclaimer_suffix': ' 反馈问题',
+        'notice_close': '关闭提示',
         'view_globe': '地球',
         'view_globe_title': '地球视图',
         'view_map': '地图',
@@ -103,6 +107,10 @@ const translations = {
     },
     'en': {
         'app_title': 'OB Cloud Global Regions',
+        'site_disclaimer_prefix': 'This site is community-maintained and not an official OceanBase site. The maintainer will try to keep the data accurate, but completeness is not guaranteed. You can report issues via ',
+        'site_disclaimer_link': 'GitHub issues',
+        'site_disclaimer_suffix': '.',
+        'notice_close': 'Close notice',
         'view_globe': 'Globe',
         'view_globe_title': '3D Globe View',
         'view_map': 'Map',
@@ -205,6 +213,10 @@ const translations = {
     },
     'ja': {
         'app_title': 'OB Cloud グローバルリージョン',
+        'site_disclaimer_prefix': '本サイトは OceanBase の公式サイトではなく、コミュニティでメンテナンスされています。管理人が可能な限り正確さを保ちますが、データの完全性と正確性は保証できません。GitHub の Issue から ',
+        'site_disclaimer_link': 'フィードバック',
+        'site_disclaimer_suffix': ' をお寄せください。',
+        'notice_close': '通知を閉じる',
         'view_globe': '地球',
         'view_globe_title': '地球ビュー',
         'view_map': '地図',

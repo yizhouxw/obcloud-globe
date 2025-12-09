@@ -1,16 +1,6 @@
 regions:
 - cloud_provider: Azure
   obcloud_site: 国际站
-  region: 新加坡
-  is_offline: true
-  launch_date: 已下线
-  availability_zones: []
-  channels:
-  - 云市场
-  latitude: 1.3521
-  longitude: 103.8198
-- cloud_provider: Azure
-  obcloud_site: 国际站
   region: 爱尔兰
   launch_date: '2025-09-15'
   availability_zones:
@@ -35,13 +25,3 @@ regions:
   region_code: eastus2
   latitude: 38.9072
   longitude: -77.0369
-- cloud_provider: Azure
-  obcloud_site: 国际站
-  region: 马来西亚 （吉隆坡）
-  is_offline: true
-  launch_date: 已下线
-  availability_zones: []
-  channels:
-  - 云市场
-  latitude: 3.139
-  longitude: 101.6869
