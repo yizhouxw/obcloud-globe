@@ -5,6 +5,11 @@ let currentViewMode = 'globe';
 let selectedRegion = null;
 let overlappingMarkersPopup = null;
 let hoverTimeout = null; // Global hover timeout for popup management
+let tableScrollSynced = false;
+let regionModal = null;
+let regionModalClose = null;
+let regionModalBackdrop = null;
+let regionModalBody = null;
 
 // Globe components
 let currentGlobe = null;
@@ -65,6 +70,20 @@ function getCloudProviderConfig(provider) {
     };
 }
 
+// Detect mobile viewport
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+// Shorten legend labels on mobile (e.g., drop trailing "Cloud")
+function getLegendLabel(provider) {
+    const label = t(provider);
+    if (window.innerWidth <= 768) {
+        return label.replace(/\s*Cloud$/i, '').trim();
+    }
+    return label;
+}
+
 // Initialize application
 async function init() {
     // Load map script with current language
@@ -74,7 +93,9 @@ async function init() {
     updatePageText();
 
     await loadRegionsData();
+    setupRegionModal();
     setupEventListeners();
+    setupTableScrollSync();
     initializeFilters();
     // Initialize sidebar to empty state
     resetSidebar();
@@ -261,6 +282,15 @@ function setupEventListeners() {
         });
     }
 
+    // Region modal close actions
+    if (regionModalClose) {
+        regionModalClose.addEventListener('click', hideRegionModal);
+    }
+    if (regionModalBackdrop) {
+        regionModalBackdrop.addEventListener('click', hideRegionModal);
+    }
+    window.addEventListener('resize', handleResponsiveSidebar);
+
     // Close popup when clicking outside
     document.addEventListener('click', (e) => {
         const popup = document.getElementById('overlapping-markers-popup');
@@ -293,6 +323,38 @@ function setupEventListeners() {
                 hideOverlappingMarkersPopup();
             }, 300);
         });
+    }
+}
+
+// Setup region modal references
+function setupRegionModal() {
+    regionModal = document.getElementById('region-modal');
+    regionModalClose = document.getElementById('region-modal-close');
+    regionModalBackdrop = document.getElementById('region-modal-backdrop');
+    regionModalBody = document.getElementById('region-modal-body');
+    handleResponsiveSidebar();
+}
+
+function showRegionModal(html) {
+    if (!regionModal || !regionModalBody) return;
+    regionModalBody.innerHTML = html;
+    regionModal.classList.remove('hidden');
+}
+
+function hideRegionModal() {
+    if (regionModal) {
+        regionModal.classList.add('hidden');
+    }
+}
+
+// Ensure sidebar hidden on mobile (use modal) and shown on desktop (non-table)
+function handleResponsiveSidebar() {
+    const sidebar = document.getElementById('region-info-sidebar');
+    if (!sidebar) return;
+    if (isMobile() || currentViewMode === 'table') {
+        sidebar.style.display = 'none';
+    } else {
+        sidebar.style.display = 'flex';
     }
 }
 
@@ -441,13 +503,7 @@ function switchView(mode) {
 
     // Show/hide sidebar based on view mode
     const sidebar = document.getElementById('region-info-sidebar');
-    if (sidebar) {
-        if (mode === 'table') {
-            sidebar.style.display = 'none';
-        } else {
-            sidebar.style.display = 'flex';
-        }
-    }
+    handleResponsiveSidebar();
 
     // Initialize view if not already initialized
     if (mode === 'globe' && !currentGlobe) {
@@ -572,7 +628,7 @@ function updateGlobeLegend() {
         item.className = 'legend-item';
         item.innerHTML = `
             <span class="legend-color" style="background: ${colorHex};"></span>
-            <span>${t(provider)}</span>
+            <span>${getLegendLabel(provider)}</span>
         `;
         legend.appendChild(item);
     });
@@ -826,6 +882,27 @@ function createPopupContent(region) {
     `;
 }
 
+// Sync horizontal scroll between header and body wrappers
+function setupTableScrollSync() {
+    if (tableScrollSynced) return;
+
+    const headerWrapper = document.querySelector('.table-header-wrapper');
+    const bodyWrapper = document.querySelector('.table-body-wrapper');
+
+    if (!headerWrapper || !bodyWrapper) return;
+
+    const syncFromBody = () => {
+        headerWrapper.scrollLeft = bodyWrapper.scrollLeft;
+    };
+    const syncFromHeader = () => {
+        bodyWrapper.scrollLeft = headerWrapper.scrollLeft;
+    };
+
+    bodyWrapper.addEventListener('scroll', syncFromBody);
+    headerWrapper.addEventListener('scroll', syncFromHeader);
+    tableScrollSynced = true;
+}
+
 // Sync column widths between header and body tables
 function syncTableColumnWidths() {
     const headerTable = document.getElementById('regions-table-header');
@@ -917,6 +994,13 @@ function updateTable() {
     
     // Sync column widths after table is updated
     setTimeout(syncTableColumnWidths, 0);
+
+    // Keep header/body horizontal scroll aligned
+    const headerWrapper = document.querySelector('.table-header-wrapper');
+    const bodyWrapper = document.querySelector('.table-body-wrapper');
+    if (headerWrapper && bodyWrapper) {
+        headerWrapper.scrollLeft = bodyWrapper.scrollLeft;
+    }
 }
 
 // Reset sidebar to empty state
@@ -976,9 +1060,7 @@ function showRegionInfo(region) {
     hideOverlappingMarkersPopup();
 
     selectedRegion = region;
-    const content = document.getElementById('region-info-content');
 
-    // Get cloud provider color
     const providerConfig = getCloudProviderConfig(region.cloud_provider);
     const providerColorHex = '#' + providerConfig.color.toString(16).padStart(6, '0');
 
@@ -991,7 +1073,7 @@ function showRegionInfo(region) {
         ? sites.map(site => `<span class="channel-tag">${t(site)}</span>`).join('')
         : '-';
 
-    content.innerHTML = `
+    const infoHtml = `
         <h3 style="color: ${providerColorHex};">${t(region.region)}</h3>
         <div class="info-item">
             <label>${t('label_provider')}</label>
@@ -1037,6 +1119,16 @@ function showRegionInfo(region) {
         </div>
         ` : ''}
     `;
+
+    // Render to sidebar (desktop) or modal (mobile)
+    if (isMobile()) {
+        showRegionModal(infoHtml);
+    } else {
+        const content = document.getElementById('region-info-content');
+        if (content) {
+            content.innerHTML = infoHtml;
+        }
+    }
 
     // Update selected state in views
     updateSelectedState(region);
@@ -1135,19 +1227,22 @@ function showOverlappingMarkersPopup(regions, x, y) {
     });
 
     // Position popup near click position
-    popup.style.left = `${x + 10}px`;
-    popup.style.top = `${y + 10}px`;
-
-    // Adjust if popup goes off screen
-    const rect = popup.getBoundingClientRect();
-    if (rect.right > window.innerWidth) {
-        popup.style.left = `${x - rect.width - 10}px`;
-    }
-    if (rect.bottom > window.innerHeight) {
-        popup.style.top = `${y - rect.height - 10}px`;
-    }
-
     popup.classList.remove('hidden');
+    popup.style.visibility = 'hidden';
+    popup.style.left = '0px';
+    popup.style.top = '0px';
+
+    const rect = popup.getBoundingClientRect();
+    const defaultLeft = x + 10;
+    const defaultTop = y + 10;
+    const maxLeft = Math.max(10, window.innerWidth - rect.width - 10);
+    const maxTop = Math.max(10, window.innerHeight - rect.height - 10);
+    const clampedLeft = Math.min(Math.max(10, defaultLeft), maxLeft);
+    const clampedTop = Math.min(Math.max(10, defaultTop), maxTop);
+
+    popup.style.left = `${clampedLeft}px`;
+    popup.style.top = `${clampedTop}px`;
+    popup.style.visibility = 'visible';
     popup.dataset.isVisible = 'true';
 }
 

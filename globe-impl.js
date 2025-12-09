@@ -32,6 +32,9 @@ class BaseGlobe {
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
         this.onWheel = this.onWheel.bind(this);
+        this.onTouchStart = this.onTouchStart.bind(this);
+        this.onTouchMove = this.onTouchMove.bind(this);
+        this.onTouchEnd = this.onTouchEnd.bind(this);
     }
 
     async init() {
@@ -77,7 +80,11 @@ class BaseGlobe {
         dom.addEventListener('mousedown', this.onMouseDown);
         dom.addEventListener('mousemove', this.onMouseMove);
         window.addEventListener('mouseup', this.onMouseUp); // Listen on window for drag release outside
-        dom.addEventListener('wheel', this.onWheel);
+        dom.addEventListener('wheel', this.onWheel, { passive: false });
+        dom.addEventListener('touchstart', this.onTouchStart, { passive: false });
+        dom.addEventListener('touchmove', this.onTouchMove, { passive: false });
+        window.addEventListener('touchend', this.onTouchEnd);
+        window.addEventListener('touchcancel', this.onTouchEnd);
     }
 
     destroy() {
@@ -89,6 +96,10 @@ class BaseGlobe {
         dom.removeEventListener('mousemove', this.onMouseMove);
         window.removeEventListener('mouseup', this.onMouseUp);
         dom.removeEventListener('wheel', this.onWheel);
+        dom.removeEventListener('touchstart', this.onTouchStart);
+        dom.removeEventListener('touchmove', this.onTouchMove);
+        window.removeEventListener('touchend', this.onTouchEnd);
+        window.removeEventListener('touchcancel', this.onTouchEnd);
         
         if (this.container.contains(dom)) {
             this.container.removeChild(dom);
@@ -242,6 +253,52 @@ class BaseGlobe {
         this.autoRotate = false;
         this.camera.position.z += e.deltaY * 0.5;
         this.camera.position.z = Math.max(150, Math.min(500, this.camera.position.z));
+    }
+
+    onTouchStart(e) {
+        if (!e.touches || e.touches.length !== 1) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        this.isDragging = true;
+        this.mouseDownPosition = { x: touch.clientX, y: touch.clientY };
+        this.previousMousePosition = { x: touch.clientX, y: touch.clientY };
+        this.autoRotate = false;
+    }
+
+    onTouchMove(e) {
+        if (!this.isDragging || !e.touches || e.touches.length !== 1) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+
+        const deltaX = touch.clientX - this.previousMousePosition.x;
+        const deltaY = touch.clientY - this.previousMousePosition.y;
+
+        if (this.globeMesh) {
+            this.globeMesh.rotation.y += deltaX * 0.005;
+            this.globeMesh.rotation.x += deltaY * 0.005;
+        } else if (this.earthGroup) {
+            this.earthGroup.rotation.y += deltaX * 0.005;
+            this.earthGroup.rotation.x += deltaY * 0.005;
+        }
+
+        this.previousMousePosition = { x: touch.clientX, y: touch.clientY };
+    }
+
+    onTouchEnd(e) {
+        if (!this.isDragging) return;
+        this.isDragging = false;
+
+        const touch = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0] : null;
+        if (!touch) return;
+
+        const dragDistance = Math.sqrt(
+            Math.pow(touch.clientX - this.mouseDownPosition.x, 2) + 
+            Math.pow(touch.clientY - this.mouseDownPosition.y, 2)
+        );
+
+        if (dragDistance < 5) {
+            this.handleRaycast(touch.clientX, touch.clientY);
+        }
     }
 
     handleRaycast(clientX, clientY) {
