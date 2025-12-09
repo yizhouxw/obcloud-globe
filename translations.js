@@ -33,12 +33,14 @@ const translations = {
         'label_channels': '支持的渠道',
         'label_sites': '支持的站点',
         'label_coords': '坐标',
+        'offline_status': '已下线',
         'no_match': '没有找到匹配的地域',
         'amap_fail': '高德地图初始化失败',
         'check_console': '请检查控制台错误信息',
         'alert_load_fail': '无法加载地域数据，请检查 data/ 目录下的 YAML 文件',
         'tbd': '待补充',
         '待补充': '待补充',
+        '已下线': '已下线',
 
         // Cloud Providers
         '阿里云': '阿里云',
@@ -133,12 +135,14 @@ const translations = {
         'label_channels': 'Supported Channels',
         'label_sites': 'Supported Sites',
         'label_coords': 'Coordinates',
+        'offline_status': 'Offline',
         'no_match': 'No matching regions found',
         'amap_fail': 'Map Initialization Failed',
         'check_console': 'Check console for errors',
         'alert_load_fail': 'Failed to load region data, please check YAML files in data/ directory',
         'tbd': 'TBD',
         '待补充': 'TBD',
+        '已下线': 'Offline',
 
         // Cloud Providers
         '阿里云': 'Alibaba Cloud',
@@ -233,12 +237,14 @@ const translations = {
         'label_channels': 'サポートされるチャネル',
         'label_sites': 'サポートされるサイト',
         'label_coords': '座標',
+        'offline_status': 'オフライン',
         'no_match': '一致する地域が見つかりません',
         'amap_fail': '地図の初期化に失敗しました',
         'check_console': 'エラーの詳細についてはコンソールを確認してください',
         'alert_load_fail': '地域データを読み込めませんでした。data/ ディレクトリの YAML ファイルを確認してください',
         'tbd': '未定',
         '待补充': '未定',
+        '已下线': 'オフライン',
 
         // Cloud Providers
         '阿里云': 'Alibaba Cloud',

@@ -1068,7 +1068,7 @@ function updateTable() {
                 ? region.availability_zones.map(az => formatAzName(region, az)).join(', ')
                 : t(region.availability_zones || '-')
         );
-        const launchDate = isOffline ? '已下线' : t(region.launch_date);
+        const launchDate = isOffline ? t('offline_status') : t(region.launch_date);
 
         row.innerHTML = `
             <td>${t(region.cloud_provider)}</td>
