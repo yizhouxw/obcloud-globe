@@ -793,6 +793,14 @@ function updateMap() {
             // Check for overlapping markers on hover
             const markerPos = marker.getPosition();
             const pixel = amapMap.lngLatToContainer(markerPos);
+
+            // First: exact same coordinates group
+            const sameCoordMarkers = amapMarkers.filter(m => {
+                if (!m.userData || !m.userData.region) return false;
+                return coordsEqual(m.userData.position, [region.longitude, region.latitude]);
+            }).filter(m => m !== marker);
+
+            // Then: screen-proximity group
             const nearbyMarkers = amapMarkers.filter(m => {
                 if (m === marker) return false;
                 if (!m.userData || !m.userData.region) return false;
@@ -802,12 +810,12 @@ function updateMap() {
                     Math.pow(otherPixel.x - pixel.x, 2) + 
                     Math.pow(otherPixel.y - pixel.y, 2)
                 );
-                const sameCoord = coordsEqual(m.userData.position, [region.longitude, region.latitude]);
-                return distance < 30 || sameCoord; // 30 pixels threshold or identical coords
+                return distance < 30;
             });
             
-            if (nearbyMarkers.length > 0) {
-                const regions = [region, ...nearbyMarkers.map(m => m.userData.region)];
+            const overlapGroup = sameCoordMarkers.length > 0 ? sameCoordMarkers : nearbyMarkers;
+            if (overlapGroup.length > 0) {
+                const regions = [region, ...overlapGroup.map(m => m.userData.region)];
                 const container = amapMap.getContainer();
                 const rect = container.getBoundingClientRect();
                 setTimeout(() => {
@@ -843,13 +851,17 @@ function updateMap() {
         // Store marker position for overlap detection
         marker.userData.position = [region.longitude, region.latitude];
 
-        // Add click event - check for overlapping markers
-        marker.on('click', (e) => {
+        const handleMarkerSelect = () => {
             // Get marker position in container pixels
             const markerPos = marker.getPosition();
             const pixel = amapMap.lngLatToContainer(markerPos);
             
             // Collect markers that overlap on screen or share identical coordinates
+            const sameCoordMarkers = amapMarkers.filter(m => {
+                if (!m.userData || !m.userData.region) return false;
+                return coordsEqual(m.userData.position, [region.longitude, region.latitude]);
+            }).filter(m => m !== marker);
+
             const nearbyMarkers = amapMarkers.filter(m => {
                 if (m === marker) return false;
                 if (!m.userData || !m.userData.region) return false;
@@ -859,13 +871,14 @@ function updateMap() {
                     Math.pow(otherPixel.x - pixel.x, 2) + 
                     Math.pow(otherPixel.y - pixel.y, 2)
                 );
-                const sameCoord = coordsEqual(m.userData.position, [region.longitude, region.latitude]);
-                return distance < 30 || sameCoord; // 30px or identical coords
+                return distance < 30;
             });
 
-            if (nearbyMarkers.length > 0) {
+            const overlapGroup = sameCoordMarkers.length > 0 ? sameCoordMarkers : nearbyMarkers;
+
+            if (overlapGroup.length > 0) {
                 // Multiple markers nearby, show popup
-                const regions = [region, ...nearbyMarkers.map(m => m.userData.region)];
+                const regions = [region, ...overlapGroup.map(m => m.userData.region)];
                 // Get container coordinates relative to viewport
                 const container = amapMap.getContainer();
                 const rect = container.getBoundingClientRect();
@@ -876,7 +889,11 @@ function updateMap() {
                 // Ensure any overlapping popup is hidden
                 hideOverlappingMarkersPopup();
             }
-        });
+        };
+
+        // Add click / touchend events - ensure mobile taps also trigger
+        marker.on('click', handleMarkerSelect);
+        marker.on('touchend', handleMarkerSelect);
 
         // Add to map
         marker.setMap(amapMap);

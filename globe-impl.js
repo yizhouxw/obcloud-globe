@@ -21,8 +21,11 @@ class BaseGlobe {
         
         // Interaction state
         this.isDragging = false;
+        this.isPinching = false;
         this.previousMousePosition = { x: 0, y: 0 };
         this.mouseDownPosition = { x: 0, y: 0 };
+        this.pinchStartDistance = 0;
+        this.pinchStartCameraZ = 0;
         this.hoverTimeout = null;
 
         // Bind methods
@@ -256,17 +259,46 @@ class BaseGlobe {
     }
 
     onTouchStart(e) {
-        if (!e.touches || e.touches.length !== 1) return;
+        if (!e.touches || e.touches.length === 0) return;
+
+        // Pinch start
+        if (e.touches.length >= 2) {
+            e.preventDefault();
+            this.isPinching = true;
+            this.isDragging = false;
+            this.autoRotate = false;
+            this.pinchStartDistance = this.getTouchDistance(e);
+            this.pinchStartCameraZ = this.camera.position.z;
+            return;
+        }
+
+        // Single finger drag
         e.preventDefault();
         const touch = e.touches[0];
         this.isDragging = true;
+        this.isPinching = false;
         this.mouseDownPosition = { x: touch.clientX, y: touch.clientY };
         this.previousMousePosition = { x: touch.clientX, y: touch.clientY };
         this.autoRotate = false;
     }
 
     onTouchMove(e) {
-        if (!this.isDragging || !e.touches || e.touches.length !== 1) return;
+        if (!e.touches || e.touches.length === 0) return;
+
+        // Pinch zoom
+        if (this.isPinching && e.touches.length >= 2) {
+            e.preventDefault();
+            const currentDistance = this.getTouchDistance(e);
+            if (this.pinchStartDistance > 0) {
+                const scale = this.pinchStartDistance / currentDistance;
+                const targetZ = this.pinchStartCameraZ * scale;
+                this.camera.position.z = Math.max(150, Math.min(500, targetZ));
+            }
+            return;
+        }
+
+        // Single finger drag
+        if (!this.isDragging || e.touches.length !== 1) return;
         e.preventDefault();
         const touch = e.touches[0];
 
@@ -285,6 +317,14 @@ class BaseGlobe {
     }
 
     onTouchEnd(e) {
+        // If still two touches, keep pinching
+        if (e.touches && e.touches.length >= 2) return;
+
+        if (this.isPinching) {
+            this.isPinching = false;
+            return;
+        }
+
         if (!this.isDragging) return;
         this.isDragging = false;
 
@@ -299,6 +339,14 @@ class BaseGlobe {
         if (dragDistance < 5) {
             this.handleRaycast(touch.clientX, touch.clientY);
         }
+    }
+
+    getTouchDistance(e) {
+        if (!e.touches || e.touches.length < 2) return 0;
+        const [t1, t2] = [e.touches[0], e.touches[1]];
+        const dx = t1.clientX - t2.clientX;
+        const dy = t1.clientY - t2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     handleRaycast(clientX, clientY) {

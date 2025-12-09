@@ -1,10 +1,10 @@
 const translations = {
     'zh': {
         'app_title': 'OB Cloud 全球地域分布',
-        'view_globe': '3D 地球',
-        'view_globe_title': '3D 地球视图',
-        'view_map': '2D 地图',
-        'view_map_title': '平铺地图视图',
+        'view_globe': '地球',
+        'view_globe_title': '地球视图',
+        'view_map': '地图',
+        'view_map_title': '地图视图',
         'view_table': '列表',
         'view_table_title': '列表视图',
         'filter_all_sites': '所有站点',
@@ -201,9 +201,9 @@ const translations = {
     },
     'ja': {
         'app_title': 'OB Cloud グローバルリージョン',
-        'view_globe': '3D 地球',
-        'view_globe_title': '3D地球ビュー',
-        'view_map': '2D 地図',
+        'view_globe': '地球',
+        'view_globe_title': '地球ビュー',
+        'view_map': '地図',
         'view_map_title': '地図ビュー',
         'view_table': 'リスト',
         'view_table_title': 'リストビュー',
