@@ -75,9 +75,62 @@ function isMobile() {
     return window.innerWidth <= 768;
 }
 
+// Geo helpers for overlap detection
+const GEO_CLOSE_KM = 5;          // Regions within 5km treated as same place
+const SCREEN_CLOSE_PX = 30;      // Screen proximity threshold
+
+function haversineDistanceKm(lat1, lon1, lat2, lon2) {
+    const toRad = (d) => d * Math.PI / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+}
+
 function coordsEqual(posA, posB, tol = 1e-4) {
     if (!posA || !posB || posA.length < 2 || posB.length < 2) return false;
     return Math.abs(posA[0] - posB[0]) < tol && Math.abs(posA[1] - posB[1]) < tol;
+}
+
+// Determine overlapping markers: prioritize geographic proximity (zoom-independent),
+// then fall back to screen proximity (pixel distance based on current zoom).
+function findOverlappingMarkers(targetMarker, targetRegion, targetPixel = null) {
+    if (!amapMap) return [];
+
+    const basePixel = targetPixel || amapMap.lngLatToContainer(targetMarker.getPosition());
+
+    const samePlaceMarkers = [];
+    const screenCloseMarkers = [];
+
+    amapMarkers.forEach(m => {
+        if (m === targetMarker) return;
+        if (!m.userData || !m.userData.region) return;
+        const r = m.userData.region;
+
+        // Geo closeness (5km) or near-identical coordinates
+        const geoClose = haversineDistanceKm(targetRegion.latitude, targetRegion.longitude, r.latitude, r.longitude) <= GEO_CLOSE_KM ||
+                         coordsEqual(m.userData.position, [targetRegion.longitude, targetRegion.latitude]);
+        if (geoClose) {
+            samePlaceMarkers.push(m);
+            return;
+        }
+
+        // Screen proximity based on current zoom
+        const otherPixel = amapMap.lngLatToContainer(m.getPosition());
+        const dist = Math.sqrt(
+            Math.pow(otherPixel.x - basePixel.x, 2) +
+            Math.pow(otherPixel.y - basePixel.y, 2)
+        );
+        if (dist < SCREEN_CLOSE_PX) {
+            screenCloseMarkers.push(m);
+        }
+    });
+
+    if (samePlaceMarkers.length > 0) return samePlaceMarkers;
+    return screenCloseMarkers;
 }
 
 function isSidebarVisible() {
@@ -790,30 +843,10 @@ function updateMap() {
             markerContent.style.transform = 'scale(1.3)';
             markerContent.style.boxShadow = `0 4px 12px ${providerColorHex}80`;
             
-            // Check for overlapping markers on hover
+            // Check for overlapping markers on hover (geo then screen)
             const markerPos = marker.getPosition();
             const pixel = amapMap.lngLatToContainer(markerPos);
-
-            // First: exact same coordinates group
-            const sameCoordMarkers = amapMarkers.filter(m => {
-                if (!m.userData || !m.userData.region) return false;
-                return coordsEqual(m.userData.position, [region.longitude, region.latitude]);
-            }).filter(m => m !== marker);
-
-            // Then: screen-proximity group
-            const nearbyMarkers = amapMarkers.filter(m => {
-                if (m === marker) return false;
-                if (!m.userData || !m.userData.region) return false;
-                const otherPos = m.getPosition();
-                const otherPixel = amapMap.lngLatToContainer(otherPos);
-                const distance = Math.sqrt(
-                    Math.pow(otherPixel.x - pixel.x, 2) + 
-                    Math.pow(otherPixel.y - pixel.y, 2)
-                );
-                return distance < 30;
-            });
-            
-            const overlapGroup = sameCoordMarkers.length > 0 ? sameCoordMarkers : nearbyMarkers;
+            const overlapGroup = findOverlappingMarkers(marker, region, pixel);
             if (overlapGroup.length > 0) {
                 const regions = [region, ...overlapGroup.map(m => m.userData.region)];
                 const container = amapMap.getContainer();
@@ -856,25 +889,8 @@ function updateMap() {
             const markerPos = marker.getPosition();
             const pixel = amapMap.lngLatToContainer(markerPos);
             
-            // Collect markers that overlap on screen or share identical coordinates
-            const sameCoordMarkers = amapMarkers.filter(m => {
-                if (!m.userData || !m.userData.region) return false;
-                return coordsEqual(m.userData.position, [region.longitude, region.latitude]);
-            }).filter(m => m !== marker);
-
-            const nearbyMarkers = amapMarkers.filter(m => {
-                if (m === marker) return false;
-                if (!m.userData || !m.userData.region) return false;
-                const otherPos = m.getPosition();
-                const otherPixel = amapMap.lngLatToContainer(otherPos);
-                const distance = Math.sqrt(
-                    Math.pow(otherPixel.x - pixel.x, 2) + 
-                    Math.pow(otherPixel.y - pixel.y, 2)
-                );
-                return distance < 30;
-            });
-
-            const overlapGroup = sameCoordMarkers.length > 0 ? sameCoordMarkers : nearbyMarkers;
+            // Collect markers that overlap on geo or screen
+            const overlapGroup = findOverlappingMarkers(marker, region, pixel);
 
             if (overlapGroup.length > 0) {
                 // Multiple markers nearby, show popup
