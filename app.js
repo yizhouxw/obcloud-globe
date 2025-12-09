@@ -75,6 +75,22 @@ function isMobile() {
     return window.innerWidth <= 768;
 }
 
+function coordsEqual(posA, posB, tol = 1e-4) {
+    if (!posA || !posB || posA.length < 2 || posB.length < 2) return false;
+    return Math.abs(posA[0] - posB[0]) < tol && Math.abs(posA[1] - posB[1]) < tol;
+}
+
+function isSidebarVisible() {
+    const sidebar = document.getElementById('region-info-sidebar');
+    if (!sidebar) return false;
+    return window.getComputedStyle(sidebar).display !== 'none';
+}
+
+function shouldUseModal() {
+    // Use modal when on mobile, or when sidebar is hidden by responsive CSS
+    return isMobile() || !isSidebarVisible() || currentViewMode === 'table';
+}
+
 // Shorten legend labels on mobile (e.g., drop trailing "Cloud")
 function getLegendLabel(provider) {
     const label = t(provider);
@@ -786,7 +802,8 @@ function updateMap() {
                     Math.pow(otherPixel.x - pixel.x, 2) + 
                     Math.pow(otherPixel.y - pixel.y, 2)
                 );
-                return distance < 30; // 30 pixels threshold
+                const sameCoord = coordsEqual(m.userData.position, [region.longitude, region.latitude]);
+                return distance < 30 || sameCoord; // 30 pixels threshold or identical coords
             });
             
             if (nearbyMarkers.length > 0) {
@@ -832,7 +849,7 @@ function updateMap() {
             const markerPos = marker.getPosition();
             const pixel = amapMap.lngLatToContainer(markerPos);
             
-            // Check for nearby markers (within 30 pixels on screen)
+            // Collect markers that overlap on screen or share identical coordinates
             const nearbyMarkers = amapMarkers.filter(m => {
                 if (m === marker) return false;
                 if (!m.userData || !m.userData.region) return false;
@@ -842,7 +859,8 @@ function updateMap() {
                     Math.pow(otherPixel.x - pixel.x, 2) + 
                     Math.pow(otherPixel.y - pixel.y, 2)
                 );
-                return distance < 30; // 30 pixels threshold
+                const sameCoord = coordsEqual(m.userData.position, [region.longitude, region.latitude]);
+                return distance < 30 || sameCoord; // 30px or identical coords
             });
 
             if (nearbyMarkers.length > 0) {
@@ -1051,11 +1069,6 @@ function resetSelectedState() {
 
 // Show region info in sidebar
 function showRegionInfo(region) {
-    // Don't show sidebar in table view
-    if (currentViewMode === 'table') {
-        return;
-    }
-
     // Ensure any overlapping popup is hidden whenever a region is selected
     hideOverlappingMarkersPopup();
 
@@ -1120,8 +1133,8 @@ function showRegionInfo(region) {
         ` : ''}
     `;
 
-    // Render to sidebar (desktop) or modal (mobile)
-    if (isMobile()) {
+    // Render to sidebar (desktop) or modal (mobile / sidebar hidden)
+    if (shouldUseModal()) {
         showRegionModal(infoHtml);
     } else {
         const content = document.getElementById('region-info-content');
