@@ -1,44 +1,40 @@
 regions:
 - cloud_provider: 百度云
+  region_code: cn-bd
   obcloud_site: 中国站
-  region: 保定
+  region: 中国-保定
   launch_date: '2025-05-27'
   availability_zones:
-  - cn-bd-a
   - cn-bd-b
   - cn-bd-c
   - cn-bd-d
   channels:
   - 官网渠道
-  region_code: cn-bd
   latitude: 38.851
   longitude: 115.49
 - cloud_provider: 百度云
+  region_code: cn-bj
   obcloud_site: 中国站
-  region: 北京
+  region: 中国-北京
   launch_date: '2025-05-12'
   availability_zones:
-  - cn-bj-a
-  - cn-bj-b
-  - cn-bj-c
   - cn-bj-d
   - cn-bj-e
   - cn-bj-f
   - cn-bj-i
   channels:
   - 官网渠道
-  region_code: cn-bj
   latitude: 39.9042
   longitude: 116.4074
 - cloud_provider: 百度云
+  region_code: cn-fwh
   obcloud_site: 中国站
-  region: 武汉
+  region: 中国-武汉
   launch_date: '2025-08-02'
   availability_zones:
   - cn-fwh-a
   - cn-fwh-b
   channels:
   - 官网渠道
-  region_code: cn-fwh
   latitude: 30.5928
   longitude: 114.3055

@@ -497,7 +497,40 @@ function initializeFilters() {
     const currentRegion = document.getElementById('regionFilter') ? document.getElementById('regionFilter').value : '';
 
     const cloudProviders = [...new Set(regionsData.map(r => r.cloud_provider))].sort();
-    const regions = [...new Set(regionsData.map(r => r.region))].sort();
+    
+    // Sort regions by area priority (language-specific), then by city alphabetically
+    const areaPriority = typeof getRegionAreaPriority === 'function' ? getRegionAreaPriority() : {};
+    
+    const uniqueRegions = [...new Set(regionsData.map(r => r.region))];
+    const regions = uniqueRegions.sort((a, b) => {
+        // Extract area name (prefix before '-')
+        const getArea = (region) => {
+            const parts = region.split('-');
+            return parts[0];
+        };
+        
+        // Extract city name (suffix after '-')
+        const getCity = (region) => {
+            const parts = region.split('-');
+            return parts.slice(1).join('-'); // Handle multi-part city names
+        };
+        
+        const areaA = getArea(a);
+        const areaB = getArea(b);
+        const priorityA = areaPriority[areaA] || 999;
+        const priorityB = areaPriority[areaB] || 999;
+        
+        // First sort by area priority
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+        
+        // Then sort by city name alphabetically
+        const cityA = getCity(a);
+        const cityB = getCity(b);
+        const locale = currentLang === 'zh' ? 'zh-CN' : currentLang;
+        return cityA.localeCompare(cityB, locale);
+    });
     
     // Get all unique channels from all regions
     const allChannels = new Set();

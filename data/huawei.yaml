@@ -1,104 +1,103 @@
 regions:
 - cloud_provider: 华为云
+  region_code: cn-east-3
   obcloud_site: 中国站
-  region: 上海
+  region: 中国-上海
   launch_date: '2024-10-18'
   availability_zones:
-  - cn-east-3a
-  - cn-east-3b
-  - cn-east-3c
-  - cn-east-3d
+  - cn-east-3-a
+  - cn-east-3-b
+  - cn-east-3-c
+  - cn-east-3-d
   channels:
   - 联营联运
   - 自运营
-  region_code: cn-east-3
   latitude: 31.2304
   longitude: 121.4737
 - cloud_provider: 华为云
+  region_code: ap-southeast-1
   obcloud_site: 国际站
-  region: 中国 (香港)
+  region: 中国-香港
   launch_date: '2025-09-09'
   availability_zones:
-  - ap-southeast-1a
-  - ap-southeast-1b
-  - ap-southeast-1c
-  - ap-southeast-1g
+  - ap-southeast-1-a
+  - ap-southeast-1-b
+  - ap-southeast-1-c
+  - ap-southeast-1-g
   channels:
   - 云市场
   - 自运营
-  region_code: ap-southeast-1
   latitude: 22.3193
   longitude: 114.1694
 - cloud_provider: 华为云
+  region_code: cn-north-4
   obcloud_site: 中国站
-  region: 北京
+  region: 中国-北京
   launch_date: '2024-10-18'
   availability_zones:
-  - cn-north-4a
-  - cn-north-4b
-  - cn-north-4c
-  - cn-north-4g
+  - cn-north-4-a
+  - cn-north-4-b
+  - cn-north-4-c
+  - cn-north-4-g
   channels:
   - 联营联运
   - 自运营
-  region_code: cn-north-4
   latitude: 39.9042
   longitude: 116.4074
 - cloud_provider: 华为云
+  region_code: cn-south-1
   obcloud_site: 中国站
-  region: 广州
+  region: 中国-广州
   launch_date: '2024-10-18'
   availability_zones:
-  - cn-south-1c
-  - cn-south-1e
-  - cn-south-1f
-  - cn-south-1g
-  - cn-south-2b
+  - cn-south-1-e
+  - cn-south-1-f
+  - cn-south-1-g
   channels:
   - 联营联运
   - 自运营
-  region_code: cn-south-1
   latitude: 23.1291
   longitude: 113.2644
 - cloud_provider: 华为云
+  region_code: ap-southeast-3
   obcloud_site: 中国站
-  region: 新加坡
+  region: 东南亚-新加坡
   launch_date: '2025-03-26'
   availability_zones:
-  - ap-southeast-3a
-  - ap-southeast-3b
-  - ap-southeast-3c
+  - ap-southeast-3-a
+  - ap-southeast-3-b
+  - ap-southeast-3-c
+  - ap-southeast-3-e
   channels:
   - 联营联运
   - 自运营
-  region_code: ap-southeast-3
   latitude: 1.3521
   longitude: 103.8198
 - cloud_provider: 华为云
+  region_code: cn-east-4
   obcloud_site: 中国站
-  region: 芜湖
+  region: 中国-芜湖
   launch_date: '2025-07-02'
   availability_zones:
-  - cn-east-4a
-  - cn-east-4b
-  - cn-east-4c
+  - cn-east-4-a
+  - cn-east-4-b
+  - cn-east-4-c
   channels:
   - 联营联运
   - 自运营
-  region_code: cn-east-4
   latitude: 31.3529
   longitude: 118.3765
 - cloud_provider: 华为云
+  region_code: cn-east-5
   obcloud_site: 中国站
-  region: 青岛
+  region: 中国-青岛
   launch_date: '2024-10-21'
   availability_zones:
-  - cn-east-5a
-  - cn-east-5b
-  - cn-east-5c
+  - cn-east-5-a
+  - cn-east-5-b
+  - cn-east-5-c
   channels:
   - 联营联运
   - 自运营
-  region_code: cn-east-5
   latitude: 36.0671
   longitude: 120.3826

@@ -1,7 +1,8 @@
 regions:
 - cloud_provider: GCP
+  region_code: asia-southeast2
   obcloud_site: 国际站
-  region: 印尼 (雅加达)
+  region: 东南亚-雅加达
   launch_date: '2024-10-21'
   availability_zones:
   - asia-southeast2-a
@@ -10,12 +11,12 @@ regions:
   channels:
   - 云市场
   - 自运营
-  region_code: asia-southeast2
   latitude: -6.2088
   longitude: 106.8456
 - cloud_provider: GCP
+  region_code: asia-southeast1
   obcloud_site: 国际站
-  region: 新加坡
+  region: 东南亚-新加坡
   launch_date: '2024-10-21'
   availability_zones:
   - asia-southeast1-a
@@ -24,12 +25,12 @@ regions:
   channels:
   - 云市场
   - 自运营
-  region_code: asia-southeast1
   latitude: 1.3521
   longitude: 103.8198
 - cloud_provider: GCP
+  region_code: asia-northeast1
   obcloud_site: 国际站
-  region: 日本 (东京)
+  region: 东亚-东京
   launch_date: '2025-08-14'
   availability_zones:
   - asia-northeast1-a
@@ -38,12 +39,12 @@ regions:
   channels:
   - 云市场
   - 自运营
-  region_code: asia-northeast1
   latitude: 35.6762
   longitude: 139.6503
 - cloud_provider: GCP
+  region_code: us-west1
   obcloud_site: 国际站
-  region: 美国 (俄勒冈)
+  region: 美国-俄勒冈
   launch_date: '2025-05-24'
   availability_zones:
   - us-west1-a
@@ -52,6 +53,5 @@ regions:
   channels:
   - 云市场
   - 自运营
-  region_code: us-west1
   latitude: 45.5152
   longitude: -122.6784
