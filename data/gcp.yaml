@@ -14,6 +14,20 @@ regions:
   latitude: -6.2088
   longitude: 106.8456
 - cloud_provider: GCP
+  region_code: europe-west3
+  obcloud_site: 国际站
+  region: 欧洲-法兰克福
+  launch_date: '2025-12-01'
+  availability_zones:
+  - europe-west3-a
+  - europe-west3-b
+  - europe-west3-c
+  channels:
+  - 云市场
+  - 自运营
+  latitude: 50.1109
+  longitude: 8.6821
+- cloud_provider: GCP
   region_code: asia-southeast1
   obcloud_site: 国际站
   region: 东南亚-新加坡

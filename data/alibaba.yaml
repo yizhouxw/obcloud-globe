@@ -26,6 +26,7 @@ regions:
   - cn-hangzhou-finance-k
   channels:
   - 官网渠道
+  - 精选商城
   latitude: 30.2741
   longitude: 120.1551
 - cloud_provider: 阿里云
