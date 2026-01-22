@@ -1,4 +1,5 @@
 # 忽略配置文件（包含敏感信息）
-config.js
+/public/config.js
+/config.js
 *.example
 .DS_Store
