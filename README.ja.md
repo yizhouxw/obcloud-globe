@@ -29,23 +29,24 @@ Language: [English](README.md) | [简体中文](README.zh.md) | [日本語](READ
 
 ブラウザで `http://localhost:<port>` を開きます。
 
-手動で起動する場合:
+手動で起動する場合、プロジェクトルートから次のいずれかを実行します:
 ```bash
-python3 -m http.server 8000
+python3 -m http.server --directory public 8000
 # または
-npx http-server -p 8000
+npx http-server public -p 8000
 ```
 
 ## 地図 API キー
-`config.js` に `AMAP_API_KEY` が定義されています。必要に応じて自身のキーに置き換えてください。
+ローカル開発の場合、`public/` ディレクトリに `const AMAP_API_KEY = 'YOUR_AMAP_KEY_HERE';` という内容で `config.js` ファイルを作成してください。デプロイワークフローはこのキーを GitHub secrets から自動的に注入します。
 
 ## プロジェクト構成
-- `index.html` – ページとビューコンテナ
-- `app.js` – ロジック（データロード、ビュー、フィルタ、インタラクション）
-- `globe-impl.js` – 地球描画
-- `styles.css` – スタイル
-- `data/` – 地域データ (YAML)
-- `start.sh` – ローカル起動スクリプト
+- `public/` - すべての静的ファイルを含むウェブルート。
+- `public/index.html` – メインのHTMLページとビューコンテナ。
+- `public/styles.css` – アプリケーションの全スタイル。
+- `public/src/` – JavaScriptソースコード (`app.js`, `globe-impl.js` など)。
+- `public/data/` – YAML形式の地域データセット。
+- `start.sh` – ローカル開発サーバーを起動するためのヘルパースクリプト。
+- `.github/` – GitHub Actions のデプロイワークフロー。
 
 ## License
 `LICENSE` を参照してください。

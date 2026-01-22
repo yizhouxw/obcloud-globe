@@ -29,23 +29,24 @@ Requires a simple static file server (Python 3 or Node.js).
 
 Then open `http://localhost:<port>` in a modern browser.
 
-If you prefer manual commands:
+If you prefer manual commands, run one of these from the project root:
 ```bash
-python3 -m http.server 8000
+python3 -m http.server --directory public 8000
 # or
-npx http-server -p 8000
+npx http-server public -p 8000
 ```
 
 ## Map API key
-`config.js` contains `AMAP_API_KEY`. Replace it with your own key if needed.
+For local development, create a file named `public/config.js` with the content `const AMAP_API_KEY = 'YOUR_AMAP_KEY_HERE';`. The deployment workflow injects this key automatically from GitHub secrets.
 
 ## Project layout
-- `index.html` – main page and view containers
-- `app.js` – app logic (data load, views, filters, interactions)
-- `globe-impl.js` – globe rendering
-- `styles.css` – styling
-- `data/` – region datasets (YAML)
-- `start.sh` – helper to launch a local static server
+- `public/` - The web root containing all static files.
+- `public/index.html` – The main HTML page and view containers.
+- `public/styles.css` – All application styles.
+- `public/src/` – JavaScript source code (`app.js`, `globe-impl.js`, etc.).
+- `public/data/` – Region datasets in YAML format.
+- `start.sh` – Helper script to run a local development server.
+- `.github/` – GitHub Actions deployment workflow.
 
 ## License
 See `LICENSE`.

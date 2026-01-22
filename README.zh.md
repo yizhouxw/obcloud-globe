@@ -29,23 +29,24 @@
 
 然后在浏览器打开 `http://localhost:<port>`。
 
-如果想手动运行：
+如果想手动运行，请在项目根目录执行以下命令之一：
 ```bash
-python3 -m http.server 8000
+python3 -m http.server --directory public 8000
 # 或
-npx http-server -p 8000
+npx http-server public -p 8000
 ```
 
 ## 地图 API Key
-`config.js` 中包含 `AMAP_API_KEY`，如需请替换为你的密钥。
+本地开发时，请在 `public/` 目录下创建一个 `config.js` 文件，内容为 `const AMAP_API_KEY = 'YOUR_AMAP_KEY_HERE';`。部署工作流会自动从 GitHub secrets 注入此密钥。
 
 ## 项目结构
-- `index.html` – 页面框架与视图容器
-- `app.js` – 逻辑（数据加载、视图、过滤、交互）
-- `globe-impl.js` – 地球渲染
-- `styles.css` – 样式
-- `data/` – 地域数据（YAML）
-- `start.sh` – 本地启动脚本
+- `public/` - 包含所有静态文件的网站根目录。
+- `public/index.html` – 主 HTML 页面与视图容器。
+- `public/styles.css` – 全部应用样式。
+- `public/src/` – JavaScript 源代码 (`app.js`, `globe-impl.js` 等)。
+- `public/data/` – YAML 格式的地域数据集。
+- `start.sh` – 用于运行本地开发服务器的辅助脚本。
+- `.github/` – GitHub Actions 部署工作流。
 
 ## License
 见 `LICENSE`。

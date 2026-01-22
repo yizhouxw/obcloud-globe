@@ -11,6 +11,9 @@ echo ""
 echo "Press Ctrl+C to stop the server"
 echo ""
 
+# Change to the public directory to serve files from there
+cd public
+
 # Try Python 3 first, then Python 2, then node http-server
 if command -v python3 &> /dev/null; then
     python3 -m http.server $PORT
