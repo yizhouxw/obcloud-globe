@@ -1,7 +1,8 @@
 regions:
 - cloud_provider: Azure
   region_code: northeurope
-  obcloud_site: 国际站
+  obcloud_sites:
+  - 国际站
   region: 欧洲-爱尔兰
   launch_date: '2025-09-15'
   availability_zones:
@@ -9,18 +10,19 @@ regions:
   - northeurope-2
   - northeurope-3
   channels:
-  - 云市场
+  - 国际站-云市场
   latitude: 53.3498
   longitude: -6.2603
 - cloud_provider: Azure
   region_code: eastus2
-  obcloud_site: 国际站
+  obcloud_sites:
+  - 国际站
   region: 美国-美东2（弗吉尼亚）
   launch_date: '2025-08-11'
   availability_zones:
   - eastus2-1
   - eastus2-3
   channels:
-  - 云市场
+  - 国际站-云市场
   latitude: 38.9072
   longitude: -77.0369

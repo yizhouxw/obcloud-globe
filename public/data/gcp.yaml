@@ -1,7 +1,8 @@
 regions:
 - cloud_provider: GCP
   region_code: asia-southeast2
-  obcloud_site: 国际站
+  obcloud_sites:
+  - 国际站
   region: 东南亚-雅加达
   launch_date: '2024-10-21'
   availability_zones:
@@ -9,13 +10,14 @@ regions:
   - asia-southeast2-b
   - asia-southeast2-c
   channels:
-  - 云市场
-  - 自运营
+  - 国际站-云市场
+  - 国际站-自运营
   latitude: -6.2088
   longitude: 106.8456
 - cloud_provider: GCP
   region_code: europe-west3
-  obcloud_site: 国际站
+  obcloud_sites:
+  - 国际站
   region: 欧洲-法兰克福
   launch_date: '2025-12-01'
   availability_zones:
@@ -23,13 +25,14 @@ regions:
   - europe-west3-b
   - europe-west3-c
   channels:
-  - 云市场
-  - 自运营
+  - 国际站-云市场
+  - 国际站-自运营
   latitude: 50.1109
   longitude: 8.6821
 - cloud_provider: GCP
   region_code: asia-southeast1
-  obcloud_site: 国际站
+  obcloud_sites:
+  - 国际站
   region: 东南亚-新加坡
   launch_date: '2024-10-21'
   availability_zones:
@@ -37,13 +40,14 @@ regions:
   - asia-southeast1-b
   - asia-southeast1-c
   channels:
-  - 云市场
-  - 自运营
+  - 国际站-云市场
+  - 国际站-自运营
   latitude: 1.3521
   longitude: 103.8198
 - cloud_provider: GCP
   region_code: asia-northeast1
-  obcloud_site: 国际站
+  obcloud_sites:
+  - 国际站
   region: 东亚-东京
   launch_date: '2025-08-14'
   availability_zones:
@@ -51,13 +55,14 @@ regions:
   - asia-northeast1-b
   - asia-northeast1-c
   channels:
-  - 云市场
-  - 自运营
+  - 国际站-云市场
+  - 国际站-自运营
   latitude: 35.6762
   longitude: 139.6503
 - cloud_provider: GCP
   region_code: us-west1
-  obcloud_site: 国际站
+  obcloud_sites:
+  - 国际站
   region: 美国-俄勒冈
   launch_date: '2025-05-24'
   availability_zones:
@@ -65,7 +70,7 @@ regions:
   - us-west1-b
   - us-west1-c
   channels:
-  - 云市场
-  - 自运营
+  - 国际站-云市场
+  - 国际站-自运营
   latitude: 45.5152
   longitude: -122.6784

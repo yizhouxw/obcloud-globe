@@ -61,6 +61,41 @@ const CLOUD_PROVIDER_COLORS = {
     }
 };
 
+// Channel URL configuration
+// Keys format: site-cloudProvider-channelName
+const CHANNEL_URLS = {
+    // 阿里云 (Alibaba Cloud)
+    '中国站-阿里云-官网渠道': 'https://www.aliyun.com/product/oceanbase',
+    '中国站-阿里云-精选商城': 'https://market.aliyun.com/store/4925932/list.html',
+    '中国站-阿里云-自运营': 'https://console-cn.oceanbase.com',
+    '国际站-阿里云-官网渠道': 'https://oceanbase.console.alibabacloud.com',
+    '国际站-阿里云-云市场': 'https://marketplace.alibabacloud.com/products/56698004/sgcmgj00034744.html',
+    '国际站-阿里云-自运营': 'https://console-en.oceanbase.com',
+
+    // AWS
+    '国际站-AWS-云市场': 'https://aws.amazon.com/marketplace/procurement?productId=e1696220-a3d7-41f5-abbd-927715329177&sellerId=684ef0d6-1b0c-4af5-870a-2f7f51b20512&isBuyWithAWS=true',
+    '国际站-AWS-自运营': 'https://console-en.oceanbase.com',
+
+    // Azure
+    '国际站-Azure-云市场': 'https://marketplace.microsoft.com/en-us/product/saas/oceanbasehongkonglimited1756112110689.oceanbase-payg',
+
+    // 百度云 (Baidu Cloud)
+    '中国站-百度云-官网渠道': 'https://cloud.baidu.com/product/ddc.html',
+
+    // GCP
+    '国际站-GCP-云市场': 'https://console.cloud.google.com/marketplace/product/oceanbase-public/oceanbase-cloud',
+    '国际站-GCP-自运营': 'https://console-en.oceanbase.com',
+
+    // 华为云 (Huawei Cloud)
+    '中国站-华为云-联营联运': 'https://marketplace.huaweicloud.com/contents/fd4d74ee-d564-4af1-9fdd-0884e44f6048#productid=OFFI936837220074307584',
+    '中国站-华为云-自运营': 'https://console-cn.oceanbase.com',
+    '国际站-华为云-云市场': 'https://marketplace.huaweicloud.com/intl/contents/9924abf4-8425-494b-a836-a1de8da9c476',
+    '国际站-华为云-自运营': 'https://console-en.oceanbase.com',
+
+    // 腾讯云 (Tencent Cloud)
+    '中国站-腾讯云-自运营': 'https://console-cn.oceanbase.com',
+};
+
 // Get cloud provider color configuration
 function getCloudProviderConfig(provider) {
     return CLOUD_PROVIDER_COLORS[provider] || {
@@ -85,8 +120,8 @@ function haversineDistanceKm(lat1, lon1, lat2, lon2) {
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon / 2) ** 2;
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
     return 2 * R * Math.asin(Math.sqrt(a));
 }
 
@@ -112,7 +147,7 @@ function findOverlappingMarkers(targetMarker, targetRegion, targetPixel = null) 
 
         // Geo closeness (5km) or near-identical coordinates
         const geoClose = haversineDistanceKm(targetRegion.latitude, targetRegion.longitude, r.latitude, r.longitude) <= GEO_CLOSE_KM ||
-                         coordsEqual(m.userData.position, [targetRegion.longitude, targetRegion.latitude]);
+            coordsEqual(m.userData.position, [targetRegion.longitude, targetRegion.latitude]);
         if (geoClose) {
             samePlaceMarkers.push(m);
             return;
@@ -232,7 +267,7 @@ function loadAMapScript(targetLang = currentLang) {
     script.id = 'amap-script';
     script.src = `https://webapi.amap.com/maps?v=2.0&key=${AMAP_API_KEY}&language=${langCode}`;
     script.async = true;
-    script.onload = function() {
+    script.onload = function () {
         console.log(`高德地图 API 加载完成 (language=${langCode})`);
         isAMapLoaded = true;
         amapScriptLang = langCode;
@@ -241,7 +276,7 @@ function loadAMapScript(targetLang = currentLang) {
             recreateAMap(currentLang);
         }
     };
-    script.onerror = function() {
+    script.onerror = function () {
         console.error('高德地图 API 加载失败，请检查 API Key 或网络');
     };
 
@@ -262,7 +297,7 @@ async function loadRegionsData() {
             'data/tencent.yaml',
             'data/baidu.yaml'
         ];
-        
+
         // Load all provider files in parallel
         const loadPromises = providerFiles.map(async (file) => {
             try {
@@ -281,9 +316,9 @@ async function loadRegionsData() {
                 return { regions: [] };
             }
         });
-        
+
         const allData = await Promise.all(loadPromises);
-        
+
         // Merge all regions from all providers
         regionsData = [];
         allData.forEach((data, index) => {
@@ -292,32 +327,32 @@ async function loadRegionsData() {
                 console.log(`Loaded ${data.regions.length} regions from ${providerFiles[index]}`);
             }
         });
-        
+
         filteredRegions = [...regionsData];
-        
+
         // Validate and log coordinate information
         let validCoordinates = 0;
         let missingCoordinates = 0;
         let invalidCoordinates = 0;
-        
+
         regionsData.forEach(region => {
             if (!region.latitude || !region.longitude) {
                 missingCoordinates++;
                 console.warn(`Region "${region.region}" (${region.cloud_provider}) is missing coordinates`);
-            } else if (region.latitude < -90 || region.latitude > 90 || 
-                      region.longitude < -180 || region.longitude > 180) {
+            } else if (region.latitude < -90 || region.latitude > 90 ||
+                region.longitude < -180 || region.longitude > 180) {
                 invalidCoordinates++;
                 console.warn(`Region "${region.region}" (${region.cloud_provider}) has invalid coordinates: ${region.latitude}, ${region.longitude}`);
             } else {
                 validCoordinates++;
             }
         });
-        
+
         console.log(`Loaded ${regionsData.length} regions:`);
         console.log(`  - ${validCoordinates} with valid coordinates`);
         console.log(`  - ${missingCoordinates} missing coordinates`);
         console.log(`  - ${invalidCoordinates} with invalid coordinates`);
-        
+
         if (validCoordinates === 0) {
             console.warn('No regions with valid coordinates found! Markers will not be displayed.');
         }
@@ -387,9 +422,9 @@ function setupEventListeners() {
         const popup = document.getElementById('overlapping-markers-popup');
         if (popup && !popup.contains(e.target) && !popup.classList.contains('hidden')) {
             // Don't close if clicking on markers or popup
-            const isMarkerClick = e.target.closest('.custom-marker') || 
-                                  e.target.closest('#globe-canvas') ||
-                                  e.target.closest('#overlapping-markers-popup');
+            const isMarkerClick = e.target.closest('.custom-marker') ||
+                e.target.closest('#globe-canvas') ||
+                e.target.closest('#overlapping-markers-popup');
             if (!isMarkerClick) {
                 hideOverlappingMarkersPopup();
             }
@@ -406,7 +441,7 @@ function setupEventListeners() {
                 hoverTimeout = null;
             }
         });
-        
+
         popup.addEventListener('mouseleave', (e) => {
             // Schedule hide when mouse leaves the popup
             if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -449,8 +484,34 @@ function handleResponsiveSidebar() {
     }
 }
 
+// Helper to generate channel HTML (link or text)
+function getChannelHtml(channelName, region) {
+    // Construct key: site-cloudProvider-channelName
+    // channelName format is assumed to be Site-ChannelSuffix (e.g. 中国站-官网渠道)
+    const parts = channelName.split('-');
+    const site = parts[0];
+    const suffix = parts.slice(1).join('-');
+
+    // Safety check just in case
+    if (!site || !region || !region.cloud_provider) {
+        return `<span class="channel-tag">${t(channelName)}</span>`;
+    }
+
+    const key = `${site}-${region.cloud_provider}-${suffix}`;
+    const url = CHANNEL_URLS[key];
+    const label = t(channelName);
+
+    if (url) {
+        return `<a href="${url}" target="_blank" class="channel-tag channel-link" title="${label}">${label}</a>`;
+    }
+    return `<span class="channel-tag">${label}</span>`;
+}
+
 // Helper function to normalize obcloud_site (can be string or array)
 function getObcloudSites(region) {
+    if (region.obcloud_sites) {
+        return Array.isArray(region.obcloud_sites) ? region.obcloud_sites : [region.obcloud_sites];
+    }
     if (!region.obcloud_site) return [];
     if (Array.isArray(region.obcloud_site)) {
         return region.obcloud_site;
@@ -497,10 +558,10 @@ function initializeFilters() {
     const currentRegion = document.getElementById('regionFilter') ? document.getElementById('regionFilter').value : '';
 
     const cloudProviders = [...new Set(regionsData.map(r => r.cloud_provider))].sort();
-    
+
     // Sort regions by area priority (language-specific), then by city alphabetically
     const areaPriority = typeof getRegionAreaPriority === 'function' ? getRegionAreaPriority() : {};
-    
+
     const uniqueRegions = [...new Set(regionsData.map(r => r.region))];
     const regions = uniqueRegions.sort((a, b) => {
         // Extract area name (prefix before '-')
@@ -508,30 +569,30 @@ function initializeFilters() {
             const parts = region.split('-');
             return parts[0];
         };
-        
+
         // Extract city name (suffix after '-')
         const getCity = (region) => {
             const parts = region.split('-');
             return parts.slice(1).join('-'); // Handle multi-part city names
         };
-        
+
         const areaA = getArea(a);
         const areaB = getArea(b);
         const priorityA = areaPriority[areaA] || 999;
         const priorityB = areaPriority[areaB] || 999;
-        
+
         // First sort by area priority
         if (priorityA !== priorityB) {
             return priorityA - priorityB;
         }
-        
+
         // Then sort by city name alphabetically
         const cityA = getCity(a);
         const cityB = getCity(b);
         const locale = currentLang === 'zh' ? 'zh-CN' : currentLang;
         return cityA.localeCompare(cityB, locale);
     });
-    
+
     // Get all unique channels from all regions
     const allChannels = new Set();
     regionsData.forEach(region => {
@@ -540,7 +601,7 @@ function initializeFilters() {
         }
     });
     const channels = [...allChannels].sort();
-    
+
     // Get all unique sites from all regions
     const allSites = new Set();
     regionsData.forEach(region => {
@@ -603,18 +664,18 @@ function applyFilters() {
         // Match site (check if region has the selected site)
         const regionSites = getObcloudSites(region);
         const matchSite = !siteFilter || regionSites.includes(siteFilter);
-        
+
         // Match cloud provider
         const matchProvider = !cloudProviderFilter || region.cloud_provider === cloudProviderFilter;
-        
+
         // Match channel (check if region has the selected channel)
-        const matchChannel = !channelFilter || 
+        const matchChannel = !channelFilter ||
             (region.channels && Array.isArray(region.channels) && region.channels.includes(channelFilter));
-        
+
         // Match region with fuzzy search (case-insensitive)
-        const matchRegion = !regionFilter || 
+        const matchRegion = !regionFilter ||
             t(region.region).toLowerCase().includes(regionFilter.toLowerCase());
-        
+
         return matchSite && matchProvider && matchChannel && matchRegion;
     });
 
@@ -684,7 +745,7 @@ function updateCurrentView() {
 function initGlobe(force = false) {
     const container = document.getElementById('globe-canvas');
     if (!container) return;
-    
+
     if (currentGlobe && !force) {
         return;
     }
@@ -736,15 +797,15 @@ function handleGlobeClick(intersects, clientX, clientY) {
         while (obj) {
             // Check if this is a marker group (has region data)
             if (obj.userData && obj.userData.region) {
-                 if (!uniqueMarkerGroups.has(obj)) {
-                     uniqueMarkerGroups.add(obj);
-                     const region = obj.userData.region;
-                     // Avoid duplicates
-                     if (!clickedRegions.find(r => r.region === region.region && r.cloud_provider === region.cloud_provider)) {
-                         clickedRegions.push(region);
-                     }
-                 }
-                 break;
+                if (!uniqueMarkerGroups.has(obj)) {
+                    uniqueMarkerGroups.add(obj);
+                    const region = obj.userData.region;
+                    // Avoid duplicates
+                    if (!clickedRegions.find(r => r.region === region.region && r.cloud_provider === region.cloud_provider)) {
+                        clickedRegions.push(region);
+                    }
+                }
+                break;
             }
             obj = obj.parent;
         }
@@ -764,10 +825,10 @@ function updateGlobeLegend(regions = filteredRegions) {
 
     // Get unique cloud providers from filtered regions
     const providers = [...new Set(regions.map(r => r.cloud_provider))].sort();
-    
+
     // Clear existing legend items
     legend.innerHTML = '';
-    
+
     // Add title
     const titleDiv = document.createElement('div');
     titleDiv.className = 'legend-title';
@@ -778,7 +839,7 @@ function updateGlobeLegend(regions = filteredRegions) {
     providers.forEach(provider => {
         const config = getCloudProviderConfig(provider);
         const colorHex = '#' + config.color.toString(16).padStart(6, '0');
-        
+
         const item = document.createElement('div');
         item.className = 'legend-item';
         item.innerHTML = `
@@ -881,7 +942,7 @@ function updateMap() {
         }
 
         // Validate coordinate ranges
-        if (region.latitude < -90 || region.latitude > 90 || 
+        if (region.latitude < -90 || region.latitude > 90 ||
             region.longitude < -180 || region.longitude > 180) {
             console.warn(`Region ${region.region} has invalid coordinates: ${region.latitude}, ${region.longitude}`);
             markersSkipped++;
@@ -891,7 +952,7 @@ function updateMap() {
         // Get cloud provider color configuration
         const providerConfig = getCloudProviderConfig(region.cloud_provider);
         const providerColorHex = '#' + providerConfig.color.toString(16).padStart(6, '0');
-        
+
         // Create custom marker icon with cloud provider color
         const markerContent = document.createElement('div');
         markerContent.className = 'custom-marker';
@@ -906,7 +967,7 @@ function updateMap() {
             transition: all 0.2s ease;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         `;
-        
+
         // Add hover effect
         markerContent.addEventListener('mouseenter', () => {
             // Cancel any pending popup hide
@@ -931,7 +992,7 @@ function updateMap() {
 
             markerContent.style.transform = 'scale(1.3)';
             markerContent.style.boxShadow = `0 4px 12px ${providerColorHex}80`;
-            
+
             // Check for overlapping markers on hover (geo then screen)
             const markerPos = marker.getPosition();
             const pixel = amapMap.lngLatToContainer(markerPos);
@@ -948,7 +1009,7 @@ function updateMap() {
         markerContent.addEventListener('mouseleave', () => {
             markerContent.style.transform = 'scale(1)';
             markerContent.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-            
+
             // If popup is visible, schedule hide
             const popup = document.getElementById('overlapping-markers-popup');
             if (popup && !popup.classList.contains('hidden')) {
@@ -958,7 +1019,7 @@ function updateMap() {
                 }, 300);
             }
         });
-        
+
         // Create marker
         const marker = new AMap.Marker({
             position: [region.longitude, region.latitude],
@@ -977,7 +1038,7 @@ function updateMap() {
             // Get marker position in container pixels
             const markerPos = marker.getPosition();
             const pixel = amapMap.lngLatToContainer(markerPos);
-            
+
             // Collect markers that overlap on geo or screen
             const overlapGroup = findOverlappingMarkers(marker, region, pixel);
 
@@ -1047,23 +1108,23 @@ function setupTableScrollSync() {
 function syncTableColumnWidths() {
     const headerTable = document.getElementById('regions-table-header');
     const bodyTable = document.getElementById('regions-table');
-    
+
     if (!headerTable || !bodyTable) return;
-    
+
     const headerCells = headerTable.querySelectorAll('thead th');
     if (headerCells.length === 0) return;
-    
+
     // Get all body rows
     const bodyRows = bodyTable.querySelectorAll('tbody tr');
     if (bodyRows.length === 0) return;
-    
+
     // Calculate and set widths for each column
     headerCells.forEach((headerCell, index) => {
         const width = headerCell.offsetWidth;
         headerCell.style.width = width + 'px';
         headerCell.style.minWidth = width + 'px';
         headerCell.style.maxWidth = width + 'px';
-        
+
         // Apply to all cells in this column
         bodyRows.forEach(row => {
             const cell = row.querySelector(`td:nth-child(${index + 1})`);
@@ -1107,19 +1168,17 @@ function updateTable() {
         });
 
         const channels = Array.isArray(region.channels) ? region.channels : [];
-        const channelsHtml = channels.map(ch => 
-            `<span class="channel-tag">${t(ch)}</span>`
-        ).join('');
-        
+        const channelsHtml = channels.map(ch => getChannelHtml(ch, region)).join('');
+
         const sites = getObcloudSites(region);
-        const sitesHtml = sites.length > 0 
+        const sitesHtml = sites.length > 0
             ? sites.map(site => `<span class="channel-tag">${t(site)}</span>`).join('')
             : '-';
 
         const isOffline = region.is_offline === true;
         const azCount = isOffline ? '-' : (Array.isArray(region.availability_zones) ? region.availability_zones.length : t(region.availability_zones || '-'));
         const azList = isOffline ? '' : (
-            Array.isArray(region.availability_zones) 
+            Array.isArray(region.availability_zones)
                 ? region.availability_zones.map(az => formatAzName(region, az)).join(', ')
                 : t(region.availability_zones || '-')
         );
@@ -1138,7 +1197,7 @@ function updateTable() {
 
         tbody.appendChild(row);
     });
-    
+
     // Sync column widths after table is updated
     setTimeout(syncTableColumnWidths, 0);
 
@@ -1206,12 +1265,10 @@ function showRegionInfo(region) {
     const providerConfig = getCloudProviderConfig(region.cloud_provider);
     const providerColorHex = '#' + providerConfig.color.toString(16).padStart(6, '0');
 
-    const channelsHtml = region.channels.map(ch => 
-        `<span class="channel-tag">${t(ch)}</span>`
-    ).join('');
-    
+    const channelsHtml = region.channels.map(ch => getChannelHtml(ch, region)).join('');
+
     const sites = getObcloudSites(region);
-    const sitesHtml = sites.length > 0 
+    const sitesHtml = sites.length > 0
         ? sites.map(site => `<span class="channel-tag">${t(site)}</span>`).join('')
         : '-';
 
@@ -1287,11 +1344,11 @@ function updateSelectedState(region) {
         currentGlobe.markers.forEach(markerGroup => {
             if (markerGroup.userData && markerGroup.userData.region) {
                 const isSelected = markerGroup.userData.region.region === region.region &&
-                                   markerGroup.userData.region.cloud_provider === region.cloud_provider;
-                
+                    markerGroup.userData.region.cloud_provider === region.cloud_provider;
+
                 // Store selection state for scale calculation in animate loop
                 markerGroup.userData.isSelected = isSelected;
-                
+
                 if (markerGroup.userData.markerMesh) {
                     if (isSelected) {
                         // Make selected marker brighter
@@ -1309,8 +1366,8 @@ function updateSelectedState(region) {
     amapMarkers.forEach(marker => {
         if (marker.userData && marker.userData.region) {
             const isSelected = marker.userData.region.region === region.region &&
-                               marker.userData.region.cloud_provider === region.cloud_provider;
-            
+                marker.userData.region.cloud_provider === region.cloud_provider;
+
             const content = marker.getContent();
             if (content) {
                 if (isSelected) {
@@ -1399,7 +1456,7 @@ function isMouseOverPopup(mouseX, mouseY) {
     }
     const rect = popup.getBoundingClientRect();
     return mouseX >= rect.left && mouseX <= rect.right &&
-           mouseY >= rect.top && mouseY <= rect.bottom;
+        mouseY >= rect.top && mouseY <= rect.bottom;
 }
 
 // Initialize on page load

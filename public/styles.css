@@ -945,3 +945,17 @@ main.full-width {
         padding: 6px 10px;
     }
 }
+
+/* Channel Links */
+.channel-link {
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.channel-link:hover {
+    background: var(--color-primary);
+    color: var(--text-white);
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

@@ -67,6 +67,16 @@ const translations = {
         '阿里巴巴 CC': '阿里巴巴 CC',
         '联营联运': '联营联运',
 
+        // Composite Channels (Site + Channel)
+        '中国站-官网渠道': '中国站-官网渠道',
+        '中国站-精选商城': '中国站-精选商城',
+        '中国站-自运营': '中国站-自运营',
+        '中国站-阿里巴巴 CC': '中国站-阿里巴巴 CC',
+        '中国站-联营联运': '中国站-联营联运',
+        '国际站-官网渠道': '国际站-官网渠道',
+        '国际站-云市场': '国际站-云市场',
+        '国际站-自运营': '国际站-自运营',
+
         // Regions
         '中国-北京政务': '中国-北京政务',
         '中国-杭州金': '中国-杭州金',
@@ -170,6 +180,16 @@ const translations = {
         '云市场': 'Marketplace',
         '阿里巴巴 CC': 'Alibaba CC',
         '联营联运': 'Joint Operation',
+
+        // Composite Channels (Site + Channel)
+        '中国站-官网渠道': 'China Site - Official Website',
+        '中国站-精选商城': 'China Site - Selected Mall',
+        '中国站-自运营': 'China Site - Self-operated',
+        '中国站-阿里巴巴 CC': 'China Site - Alibaba CC',
+        '中国站-联营联运': 'China Site - Joint Operation',
+        '国际站-官网渠道': 'International Site - Official Website',
+        '国际站-云市场': 'International Site - Marketplace',
+        '国际站-自运营': 'International Site - Self-operated',
 
         // Regions
         '中国-北京政务': 'China - Beijing Gov',
@@ -275,6 +295,17 @@ const translations = {
         '阿里巴巴 CC': 'Alibaba CC',
         '联营联运': '共同運営',
 
+        // Composite Channels (Site + Channel)
+        '中国站-官网渠道': '中国サイト - 公式サイト',
+        '中国站-精选商城': '中国サイト - 厳選モール',
+        '中国站-自运营': '中国サイト - 自社運営',
+        '中国站-阿里巴巴 CC': '中国サイト - Alibaba CC',
+        '中国站-联营联运': '中国サイト - 共同運営',
+        '国际站-官网渠道': '国際サイト - 公式サイト',
+        '国际站-云市場': '国際サイト - マーケットプレイス', // Correcting previous finding to existing key context if any, but adding fresh here.
+        '国际站-云市场': '国際サイト - マーケットプレイス',
+        '国际站-自运营': '国際サイト - 自社運営',
+
         // Regions
         '中国-北京政务': '中国 - 北京（政務）',
         '中国-杭州金': '中国 - 杭州（金融）',
@@ -339,17 +370,17 @@ function setLanguage(lang) {
             updateCurrentView();
         }
         if (typeof initializeFilters === 'function') {
-             // Re-initialize filters to update default options
-             // Note: This might reset selections, so handle with care or just update text
-             updateFilterPlaceholders();
-             // We also need to re-populate options if they are translated
-             // But initializeFilters re-creates options from data. 
-             // To keep it simple, we might just reload filters or let user re-select if needed
-             // Better: re-run initializeFilters() but try to preserve selection if possible?
-             // For now, just update placeholders. The options themselves will be refreshed if we call initializeFilters()
-             // actually updateCurrentView() doesn't refresh filters.
-             // Let's just refresh filters to update option text.
-             initializeFilters();
+            // Re-initialize filters to update default options
+            // Note: This might reset selections, so handle with care or just update text
+            updateFilterPlaceholders();
+            // We also need to re-populate options if they are translated
+            // But initializeFilters re-creates options from data. 
+            // To keep it simple, we might just reload filters or let user re-select if needed
+            // Better: re-run initializeFilters() but try to preserve selection if possible?
+            // For now, just update placeholders. The options themselves will be refreshed if we call initializeFilters()
+            // actually updateCurrentView() doesn't refresh filters.
+            // Let's just refresh filters to update option text.
+            initializeFilters();
         }
         if (typeof resetSidebar === 'function') {
             if (!selectedRegion) {
@@ -390,18 +421,18 @@ function updatePageText() {
     document.querySelectorAll('[data-i18n-title]').forEach(element => {
         const key = element.getAttribute('data-i18n-title');
         if (translations[currentLang][key]) {
-             console.log(`[i18n] Updating title for <${element.tagName.toLowerCase()}> with key "${key}" to "${translations[currentLang][key]}"`);
+            console.log(`[i18n] Updating title for <${element.tagName.toLowerCase()}> with key "${key}" to "${translations[currentLang][key]}"`);
             element.title = translations[currentLang][key];
         } else {
             console.warn(`[i18n] Missing title translation for key "${key}" in language "${currentLang}"`);
         }
     });
-    
+
     // Update document title
     if (translations[currentLang]['app_title']) {
         document.title = translations[currentLang]['app_title'];
     }
-    
+
     // Update html lang attribute
     document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : currentLang;
 }
