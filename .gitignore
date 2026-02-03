@@ -3,3 +3,7 @@
 /config.js
 *.example
 .DS_Store
+
+# Python
+*.pyc
+__pycache__/

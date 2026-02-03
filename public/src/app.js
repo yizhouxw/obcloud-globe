@@ -690,9 +690,11 @@ function switchView(mode) {
     selectedRegion = null;
     resetSidebar();
 
-    // Update button states
+    // Update button states and aria-selected for tab role
     document.querySelectorAll('.view-mode-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === mode);
+        const isActive = btn.dataset.mode === mode;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
 
     // Update main layout for full width in table mode
