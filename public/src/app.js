@@ -67,6 +67,7 @@ const CHANNEL_URLS = {
     // 阿里云 (Alibaba Cloud)
     '中国站-阿里云-官网渠道': 'https://www.aliyun.com/product/oceanbase',
     '中国站-阿里云-精选商城': 'https://market.aliyun.com/store/4925932/list.html',
+    '中国站-阿里云-精选商城-金融': 'https://market.aliyun.com/detail/cmgj00069938', // 金融云地域商品页
     '中国站-阿里云-自运营': 'https://console-cn.oceanbase.com',
     '国际站-阿里云-官网渠道': 'https://oceanbase.console.alibabacloud.com',
     '国际站-阿里云-云市场': 'https://marketplace.alibabacloud.com/products/56698004/sgcmgj00034744.html',
@@ -497,7 +498,11 @@ function getChannelHtml(channelName, region) {
         return `<span class="channel-tag">${t(channelName)}</span>`;
     }
 
-    const key = `${site}-${region.cloud_provider}-${suffix}`;
+    let key = `${site}-${region.cloud_provider}-${suffix}`;
+    // 阿里云金融地域使用精选商城金融商品页
+    if (key === '中国站-阿里云-精选商城' && region.region && (region.region.includes('金') || (region.region_code && region.region_code.toLowerCase().includes('finance')))) {
+        key = '中国站-阿里云-精选商城-金融';
+    }
     const url = CHANNEL_URLS[key];
     const label = t(channelName);
 
