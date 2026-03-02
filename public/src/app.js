@@ -294,16 +294,14 @@ function parseChangelogEvents(markdownText) {
         const payload = eventMatch[2].trim();
         const parts = payload.split('|').map(item => item.trim());
         const [provider = '-', region = '-', detail = '-', launchDate = ''] = parts;
-        const normalizedDetail = (eventType === '地域上线' && launchDate)
-            ? `${detail} | ${launchDate}`
-            : detail;
 
         events.push({
             date: currentDate || '-',
             type: eventType,
             provider,
             region,
-            detail: normalizedDetail
+            detail,
+            launchDate
         });
     });
 
@@ -839,7 +837,13 @@ function updateChangelogView() {
 
     const sectionsHtml = Array.from(groupedByDate.entries()).map(([date, events]) => {
         const itemsHtml = events.map(event => {
-            const text = `${event.type} | ${event.provider} | ${event.region} | ${event.detail}`;
+            const typeLabel = t(event.type);
+            const providerLabel = t(event.provider);
+            const regionLabel = t(event.region);
+            const detailText = (event.type === '地域上线' && event.launchDate)
+                ? `${event.detail} | ${event.launchDate}`
+                : event.detail;
+            const text = `${typeLabel} | ${providerLabel} | ${regionLabel} | ${detailText}`;
             return `<li class="changelog-item">${text}</li>`;
         }).join('');
 
