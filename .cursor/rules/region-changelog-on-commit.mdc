@@ -1,0 +1,33 @@
+---
+description: Keep region data changes documented in CHANGELOG before commit
+alwaysApply: true
+---
+
+# Region Changelog Requirement
+
+When preparing a git commit, if region data changes are included, update `CHANGELOG.md` in the same change set.
+
+## Scope
+
+- Region data files are `public/data/*.yaml`.
+- Relevant changes include:
+  - add/remove region entries
+  - `region_code`, `region`, `launch_date` changes
+  - `availability_zones`, channels, coordinates, or site coverage changes
+
+## Required actions before commit
+
+1. Check whether staged or unstaged changes touch `public/data/*.yaml`.
+2. If yes, add a dated entry to `CHANGELOG.md` with simplified event lines.
+3. Use only these event types:
+   - `地域上线`
+   - `地域下线`
+   - `地域新增可用区`
+4. For `地域上线`, include launch date in event line (`厂商 | 地域 | region_code | launch_date`).
+5. Follow the standard changelog template defined in project rules.
+6. Keep `CHANGELOG.md` and `public/CHANGELOG.md` in sync.
+7. Keep entries concise and factual; do not invent unknown details.
+
+## Commit gate
+
+- Do not proceed with commit until the corresponding `CHANGELOG.md` entry is present when region data changed.

@@ -10,6 +10,7 @@ let regionModal = null;
 let regionModalClose = null;
 let regionModalBackdrop = null;
 let regionModalBody = null;
+let changelogEvents = [];
 
 // Globe components
 let currentGlobe = null;
@@ -177,7 +178,7 @@ function isSidebarVisible() {
 
 function shouldUseModal() {
     // Use modal when on mobile, or when sidebar is hidden by responsive CSS
-    return isMobile() || !isSidebarVisible() || currentViewMode === 'table';
+    return isMobile() || !isSidebarVisible() || currentViewMode === 'table' || currentViewMode === 'changelog';
 }
 
 // Shorten legend labels on mobile (e.g., drop trailing "Cloud")
@@ -220,6 +221,7 @@ async function init() {
 
     setupNoticeBanner();
     await loadRegionsData();
+    await loadChangelogData();
     setupRegionModal();
     setupEventListeners();
     setupTableScrollSync();
@@ -239,6 +241,73 @@ async function init() {
             recreateAMap(lang);
         }
     });
+}
+
+// Load CHANGELOG data and parse simplified events
+async function loadChangelogData() {
+    const candidatePaths = ['CHANGELOG.md', '/CHANGELOG.md', '../CHANGELOG.md'];
+    let markdown = '';
+
+    for (const path of candidatePaths) {
+        try {
+            const response = await fetch(path);
+            if (response.ok) {
+                markdown = await response.text();
+                break;
+            }
+        } catch (error) {
+            console.warn(`Failed to load changelog from ${path}:`, error);
+        }
+    }
+
+    changelogEvents = parseChangelogEvents(markdown);
+}
+
+function parseChangelogEvents(markdownText) {
+    if (!markdownText || typeof markdownText !== 'string') return [];
+
+    const lines = markdownText.split(/\r?\n/);
+    const events = [];
+    let currentDate = '';
+    let inCodeBlock = false;
+    const datePattern = /^##\s+(\d{4}-\d{2}-\d{2})\s*$/;
+    const eventPattern = /^- \[(地域上线|地域下线|地域新增可用区)\]\s+(.+)$/;
+
+    lines.forEach(line => {
+        if (line.trim().startsWith('```')) {
+            inCodeBlock = !inCodeBlock;
+            return;
+        }
+        if (inCodeBlock) return;
+
+        const dateMatch = line.match(datePattern);
+        if (dateMatch) {
+            currentDate = dateMatch[1];
+            return;
+        }
+
+        const eventMatch = line.match(eventPattern);
+        if (!eventMatch) return;
+        if (!currentDate) return;
+
+        const eventType = eventMatch[1];
+        const payload = eventMatch[2].trim();
+        const parts = payload.split('|').map(item => item.trim());
+        const [provider = '-', region = '-', detail = '-', launchDate = ''] = parts;
+        const normalizedDetail = (eventType === '地域上线' && launchDate)
+            ? `${detail} | ${launchDate}`
+            : detail;
+
+        events.push({
+            date: currentDate || '-',
+            type: eventType,
+            provider,
+            region,
+            detail: normalizedDetail
+        });
+    });
+
+    return events;
 }
 
 // Load AMap Script with target language
@@ -478,7 +547,7 @@ function hideRegionModal() {
 function handleResponsiveSidebar() {
     const sidebar = document.getElementById('region-info-sidebar');
     if (!sidebar) return;
-    if (isMobile() || currentViewMode === 'table') {
+    if (isMobile() || currentViewMode === 'table' || currentViewMode === 'changelog') {
         sidebar.style.display = 'none';
     } else {
         sidebar.style.display = 'flex';
@@ -705,7 +774,7 @@ function switchView(mode) {
     // Update main layout for full width in table mode
     const mainElement = document.querySelector('main');
     if (mainElement) {
-        if (mode === 'table') {
+        if (mode === 'table' || mode === 'changelog') {
             mainElement.classList.add('full-width');
         } else {
             mainElement.classList.remove('full-width');
@@ -745,7 +814,44 @@ function updateCurrentView() {
         updateMap();
     } else if (currentViewMode === 'table') {
         updateTable();
+    } else if (currentViewMode === 'changelog') {
+        updateChangelogView();
     }
+}
+
+function updateChangelogView() {
+    const list = document.getElementById('changelog-list');
+    if (!list) return;
+
+    if (!Array.isArray(changelogEvents) || changelogEvents.length === 0) {
+        list.innerHTML = `<div class="empty-state"><p>${t('changelog_empty')}</p></div>`;
+        return;
+    }
+
+    const groupedByDate = new Map();
+    changelogEvents.forEach(event => {
+        const dateKey = event.date || '-';
+        if (!groupedByDate.has(dateKey)) {
+            groupedByDate.set(dateKey, []);
+        }
+        groupedByDate.get(dateKey).push(event);
+    });
+
+    const sectionsHtml = Array.from(groupedByDate.entries()).map(([date, events]) => {
+        const itemsHtml = events.map(event => {
+            const text = `${event.type} | ${event.provider} | ${event.region} | ${event.detail}`;
+            return `<li class="changelog-item">${text}</li>`;
+        }).join('');
+
+        return `
+            <section class="changelog-date-group">
+                <h4 class="changelog-date-heading">${date}</h4>
+                <ul class="changelog-items">${itemsHtml}</ul>
+            </section>
+        `;
+    }).join('');
+
+    list.innerHTML = sectionsHtml;
 }
 
 // Initialize 3D Globe

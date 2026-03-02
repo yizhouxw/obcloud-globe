@@ -49,6 +49,9 @@ jobs:
           EOF
           fi
 
+      - name: Sync changelog to public
+        run: cp CHANGELOG.md public/CHANGELOG.md
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

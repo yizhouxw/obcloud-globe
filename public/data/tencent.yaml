@@ -4,7 +4,7 @@ regions:
   obcloud_sites:
   - 中国站
   region: 中国-上海
-  launch_date: '2024-10-18'
+  launch_date: '2023-05-12'
   availability_zones:
   - ap-shanghai-2
   - ap-shanghai-3
@@ -16,15 +16,14 @@ regions:
   latitude: 31.2304
   longitude: 121.4737
 - cloud_provider: 腾讯云
-  region_code: cn-hongkong
+  region_code: ap-hongkong
   obcloud_sites:
   - 中国站
   region: 中国-香港
-  launch_date: 待补充
+  launch_date: '2025-12-06'
   availability_zones:
-  - cn-hongkong-b
-  - cn-hongkong-c
-  - cn-hongkong-d
+  - ap-hongkong-2
+  - ap-hongkong-3
   channels:
   - 中国站-自运营
   latitude: 22.3193
@@ -34,7 +33,7 @@ regions:
   obcloud_sites:
   - 中国站
   region: 中国-北京
-  launch_date: '2024-10-18'
+  launch_date: '2023-04-03'
   availability_zones:
   - ap-beijing-3
   - ap-beijing-4
@@ -51,7 +50,7 @@ regions:
   obcloud_sites:
   - 中国站
   region: 中国-广州
-  launch_date: '2024-10-18'
+  launch_date: '2023-04-03'
   availability_zones:
   - ap-guangzhou-3
   - ap-guangzhou-4

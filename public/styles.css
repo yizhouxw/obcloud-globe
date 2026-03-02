@@ -433,8 +433,78 @@ main.full-width {
 /* Table View */
 #table-view {
     background: var(--bg-white);
+}
+
+#table-view.active {
     display: flex;
     flex-direction: column;
+}
+
+/* Changelog View */
+#changelog-view {
+    background: var(--bg-white);
+}
+
+.changelog-container {
+    padding: var(--spacing-xl);
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.changelog-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-main);
+}
+
+.changelog-subtitle {
+    margin-top: var(--spacing-xs);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.changelog-list {
+    flex: 1;
+    overflow: auto;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: var(--spacing-md);
+}
+
+.changelog-date-group + .changelog-date-group {
+    margin-top: var(--spacing-md);
+}
+
+.changelog-date-heading {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: #c62828;
+    font-size: 1.15rem;
+    line-height: 1.2;
+}
+
+.changelog-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.changelog-item {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 6px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border-light);
+    white-space: nowrap;
+    overflow-x: auto;
 }
 
 .table-container {
@@ -905,6 +975,10 @@ main.full-width {
     }
 
     .table-container {
+        padding: var(--spacing-md);
+    }
+
+    .changelog-container {
         padding: var(--spacing-md);
     }
 

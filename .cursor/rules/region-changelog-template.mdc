@@ -1,0 +1,23 @@
+---
+description: Use a consistent template for region changelog entries
+alwaysApply: true
+---
+
+# Region Changelog Template
+
+When updating `CHANGELOG.md` for region data changes, use this app-friendly format:
+
+```markdown
+## YYYY-MM-DD
+
+### 简化事件（用于 App 展示）
+- [地域上线] <云厂商> | <地域> | <region_code> | <上线日期 YYYY-MM-DD>
+- [地域下线] <云厂商> | <地域> | <region_code 或说明>
+- [地域新增可用区] <云厂商> | <地域> | <新增 AZ 列表>
+```
+
+Guidelines:
+- Keep one entry per change batch/date.
+- Only use 3 event types: `地域上线`, `地域下线`, `地域新增可用区`.
+- Keep each event line in one unified format: `[类型] 厂商 | 地域 | 详情`.
+- `地域上线` lines must include launch date as the 4th field.

@@ -4,7 +4,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 欧洲-爱尔兰
-  launch_date: '2025-09-15'
+  launch_date: '2025-08-27'
   availability_zones:
   - northeurope-1
   - northeurope-2
@@ -24,5 +24,25 @@ regions:
   - eastus2-3
   channels:
   - 国际站-云市场
-  latitude: 38.9072
-  longitude: -77.0369
+  latitude: 37.4316
+  longitude: -78.6569
+- cloud_provider: Azure
+  region_code: koreacentral
+  region: 东亚-韩国中部
+  launch_date: '2025-12-29'
+  availability_zones:
+  - koreacentral-1
+  - koreacentral-2
+  - koreacentral-3
+  latitude: 37.5665
+  longitude: 126.978
+- cloud_provider: Azure
+  region_code: malaysiawest
+  region: 东南亚-马来西亚西部
+  launch_date: '2026-01-28'
+  availability_zones:
+  - malaysiawest-1
+  - malaysiawest-2
+  - malaysiawest-3
+  latitude: 3.139
+  longitude: 101.6869

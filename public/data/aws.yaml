@@ -4,7 +4,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 中国-香港
-  launch_date: '2024-10-21'
+  launch_date: '2024-05-16'
   availability_zones:
   - ap-east-1-a
   - ap-east-1-b
@@ -34,7 +34,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 东南亚-雅加达
-  launch_date: '2024-10-21'
+  launch_date: '2024-05-22'
   availability_zones:
   - ap-southeast-3-a
   - ap-southeast-3-b
@@ -50,7 +50,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 南亚-孟买
-  launch_date: '2024-10-21'
+  launch_date: '2024-03-13'
   availability_zones:
   - ap-south-1-a
   - ap-south-1-b
@@ -65,7 +65,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 南美洲-圣保罗
-  launch_date: '2025-05-25'
+  launch_date: '2025-05-24'
   availability_zones:
   - sa-east-1-a
   - sa-east-1-b
@@ -80,7 +80,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 欧洲-法兰克福
-  launch_date: '2024-10-21'
+  launch_date: '2024-04-29'
   availability_zones:
   - eu-central-1-a
   - eu-central-1-b
@@ -95,7 +95,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 东南亚-新加坡
-  launch_date: '2024-10-21'
+  launch_date: '2023-03-20'
   availability_zones:
   - ap-southeast-1-a
   - ap-southeast-1-b
@@ -111,9 +111,10 @@ regions:
   obcloud_sites:
   - 国际站
   region: 东亚-东京
-  launch_date: '2024-10-21'
+  launch_date: '2023-07-13'
   availability_zones:
   - ap-northeast-1-a
+  - ap-northeast-1-b
   - ap-northeast-1-c
   - ap-northeast-1-d
   channels:
@@ -141,7 +142,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 美国-俄勒冈
-  launch_date: '2024-10-21'
+  launch_date: '2024-09-24'
   availability_zones:
   - us-west-2-a
   - us-west-2-b
@@ -156,7 +157,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 美国-弗吉尼亚
-  launch_date: '2024-10-21'
+  launch_date: '2024-08-05'
   availability_zones:
   - us-east-1-a
   - us-east-1-b
@@ -172,7 +173,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 美国-美西-加州北
-  launch_date: '2024-10-21'
+  launch_date: '2023-07-14'
   availability_zones:
   - us-west-1-a
   - us-west-1-b
@@ -187,7 +188,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 美国-俄亥俄
-  launch_date: '2025-06-12'
+  launch_date: '2025-06-11'
   availability_zones:
   - us-east-2-a
   - us-east-2-b
@@ -202,7 +203,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 东南亚-吉隆坡
-  launch_date: '2025-02-11'
+  launch_date: '2025-02-10'
   availability_zones:
   - ap-southeast-5-a
   - ap-southeast-5-b
@@ -212,3 +213,13 @@ regions:
   - 国际站-自运营
   latitude: 3.139
   longitude: 101.6869
+- cloud_provider: AWS
+  region_code: ap-southeast-7
+  region: 东南亚-曼谷
+  launch_date: '2026-01-22'
+  availability_zones:
+  - ap-southeast-7-a
+  - ap-southeast-7-b
+  - ap-southeast-7-c
+  latitude: 13.7563
+  longitude: 100.5018
