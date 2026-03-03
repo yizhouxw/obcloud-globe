@@ -39,7 +39,6 @@ regions:
   - ap-southeast-3-a
   - ap-southeast-3-b
   - ap-southeast-3-c
-  - ap-southeast-3-e
   channels:
   - 国际站-云市场
   - 国际站-自运营
@@ -100,7 +99,6 @@ regions:
   - ap-southeast-1-a
   - ap-southeast-1-b
   - ap-southeast-1-c
-  - ap-southeast-1-g
   channels:
   - 国际站-云市场
   - 国际站-自运营
@@ -114,7 +112,6 @@ regions:
   launch_date: '2023-07-13'
   availability_zones:
   - ap-northeast-1-a
-  - ap-northeast-1-b
   - ap-northeast-1-c
   - ap-northeast-1-d
   channels:
@@ -176,7 +173,6 @@ regions:
   launch_date: '2023-07-14'
   availability_zones:
   - us-west-1-a
-  - us-west-1-b
   - us-west-1-c
   channels:
   - 国际站-云市场

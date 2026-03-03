@@ -59,9 +59,6 @@ regions:
   launch_date: 待补充
   availability_zones:
   - cn-beijing-finance-1-f
-  - cn-beijing-finance-1-h
-  - cn-beijing-finance-1-i
-  - cn-beijing-finance-1-j
   - cn-beijing-finance-1-k
   - cn-beijing-finance-1-l
   - cn-beijing-finance-1-z
@@ -217,7 +214,6 @@ regions:
   - ap-southeast-1-a
   - ap-southeast-1-b
   - ap-southeast-1-c
-  - ap-southeast-1-g
   channels:
   - 中国站-官网渠道
   - 中国站-精选商城
@@ -281,7 +277,6 @@ regions:
   availability_zones:
   - ap-southeast-7-a
   - ap-southeast-7-b
-  - ap-southeast-7-c
   channels:
   - 中国站-精选商城
   - 中国站-自运营
@@ -316,8 +311,6 @@ regions:
   availability_zones:
   - us-east-1-a
   - us-east-1-b
-  - us-east-1-c
-  - us-east-1-d
   channels:
   - 中国站-官网渠道
   - 中国站-精选商城
@@ -334,7 +327,6 @@ regions:
   availability_zones:
   - us-west-1-a
   - us-west-1-b
-  - us-west-1-c
   channels:
   - 中国站-官网渠道
   - 国际站-官网渠道
@@ -380,7 +372,6 @@ regions:
   - ap-southeast-3-a
   - ap-southeast-3-b
   - ap-southeast-3-c
-  - ap-southeast-3-e
   channels:
   - 中国站-官网渠道
   - 国际站-云市场
@@ -396,6 +387,5 @@ regions:
   - ap-northeast-1-a
   - ap-northeast-1-b
   - ap-northeast-1-c
-  - ap-northeast-1-d
   latitude: 35.6762
   longitude: 139.6503
