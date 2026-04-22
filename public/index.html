@@ -64,6 +64,10 @@
                         <svg class="view-mode-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
                         <span data-i18n="view_changelog">变更</span>
                     </button>
+                    <button type="button" class="view-mode-btn" role="tab" data-mode="stats" data-i18n-title="view_stats_title" aria-selected="false">
+                        <svg class="view-mode-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        <span data-i18n="view_stats">统计</span>
+                    </button>
                 </nav>
                 <div class="filters">
                     <select id="siteFilter" class="filter-select" aria-label="Filter by Site">
@@ -143,6 +147,50 @@
                             <p class="changelog-subtitle" data-i18n="changelog_subtitle">仅展示 3 类简化事件：地域上线、地域下线、地域新增可用区</p>
                         </div>
                         <div id="changelog-list" class="changelog-list"></div>
+                    </div>
+                </div>
+
+                <!-- Stats View -->
+                <div id="stats-view" class="view-container">
+                    <div class="stats-container">
+                        <div class="stats-header">
+                            <h2 data-i18n="stats_title">地域统计</h2>
+                            <p class="stats-subtitle" data-i18n="stats_subtitle">按不同维度统计地域数量和可用区数量</p>
+                        </div>
+
+                        <div class="stats-toolbar">
+                            <label for="statsDimension" data-i18n="stats_dimension_label">统计维度</label>
+                            <select id="statsDimension" class="filter-select">
+                                <option value="site" data-i18n="stats_dimension_site">Site</option>
+                                <option value="provider" data-i18n="stats_dimension_provider">Cloud Provider</option>
+                                <option value="country" data-i18n="stats_dimension_country">Country</option>
+                                <option value="channel" data-i18n="stats_dimension_channel">Channel</option>
+                            </select>
+                        </div>
+
+                        <div class="stats-summary" id="stats-summary"></div>
+
+                        <div class="stats-chart-panel">
+                            <h3 data-i18n="stats_chart_title">图形展示</h3>
+                            <div id="stats-chart" class="stats-chart"></div>
+                        </div>
+
+                        <div class="stats-table-panel">
+                            <h3 data-i18n="stats_table_title">列表展示</h3>
+                            <div class="stats-table-wrapper">
+                                <table class="stats-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="stats_table_dimension">维度</th>
+                                            <th data-i18n="stats_table_regions">Region 数量</th>
+                                            <th data-i18n="stats_table_az">可用区数据量</th>
+                                            <th data-i18n="stats_table_avg_az">平均每地域可用区</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stats-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -2,6 +2,7 @@
 let regionsData = [];
 let filteredRegions = [];
 let currentViewMode = 'globe';
+let currentStatsDimension = 'site';
 let selectedRegion = null;
 let overlappingMarkersPopup = null;
 let hoverTimeout = null; // Global hover timeout for popup management
@@ -178,7 +179,7 @@ function isSidebarVisible() {
 
 function shouldUseModal() {
     // Use modal when on mobile, or when sidebar is hidden by responsive CSS
-    return isMobile() || !isSidebarVisible() || currentViewMode === 'table' || currentViewMode === 'changelog';
+    return isMobile() || !isSidebarVisible() || currentViewMode === 'table' || currentViewMode === 'changelog' || currentViewMode === 'stats';
 }
 
 // Shorten legend labels on mobile (e.g., drop trailing "Cloud")
@@ -468,6 +469,14 @@ function setupEventListeners() {
         });
     }
 
+    const statsDimensionSelect = document.getElementById('statsDimension');
+    if (statsDimensionSelect) {
+        statsDimensionSelect.addEventListener('change', (e) => {
+            currentStatsDimension = e.target.value;
+            updateStatsView();
+        });
+    }
+
     // Close overlapping markers popup
     const closePopupBtn = document.getElementById('close-overlapping-popup');
     if (closePopupBtn) {
@@ -545,7 +554,7 @@ function hideRegionModal() {
 function handleResponsiveSidebar() {
     const sidebar = document.getElementById('region-info-sidebar');
     if (!sidebar) return;
-    if (isMobile() || currentViewMode === 'table' || currentViewMode === 'changelog') {
+    if (isMobile() || currentViewMode === 'table' || currentViewMode === 'changelog' || currentViewMode === 'stats') {
         sidebar.style.display = 'none';
     } else {
         sidebar.style.display = 'flex';
@@ -589,6 +598,175 @@ function getObcloudSites(region) {
         return region.obcloud_site;
     }
     return [region.obcloud_site];
+}
+
+function getRegionCountry(regionName) {
+    if (!regionName || typeof regionName !== 'string') return t('stats_unknown');
+    const [country] = regionName.split('-');
+    return country || t('stats_unknown');
+}
+
+function getRegionAzCount(region) {
+    if (!region || region.is_offline) return 0;
+    return Array.isArray(region.availability_zones) ? region.availability_zones.length : 0;
+}
+
+function getStatsDimensionValues(region, dimension) {
+    if (dimension === 'site') {
+        const sites = getObcloudSites(region);
+        return sites.length > 0 ? sites : [t('stats_unknown')];
+    }
+    if (dimension === 'provider') {
+        return [region.cloud_provider || t('stats_unknown')];
+    }
+    if (dimension === 'country') {
+        return [getRegionCountry(region.region)];
+    }
+    if (dimension === 'channel') {
+        return (Array.isArray(region.channels) && region.channels.length > 0)
+            ? region.channels
+            : [t('stats_unknown')];
+    }
+    return [];
+}
+
+function getStatsDimensionLabel(dimension) {
+    if (dimension === 'site') return t('stats_dimension_site');
+    if (dimension === 'provider') return t('stats_dimension_provider');
+    if (dimension === 'country') return t('stats_dimension_country');
+    if (dimension === 'channel') return t('stats_dimension_channel');
+    return t('stats_table_dimension');
+}
+
+function buildStatsData(regions, dimension) {
+    const groups = new Map();
+    const safeRegions = Array.isArray(regions) ? regions : [];
+
+    safeRegions.forEach(region => {
+        const values = getStatsDimensionValues(region, dimension);
+        values.forEach(value => {
+            if (!groups.has(value)) {
+                groups.set(value, {
+                    key: value,
+                    regionCount: 0,
+                    azCount: 0
+                });
+            }
+            const item = groups.get(value);
+            item.regionCount += 1;
+            item.azCount += getRegionAzCount(region);
+        });
+    });
+
+    return Array.from(groups.values())
+        .map(item => ({
+            ...item,
+            averageAzPerRegion: item.regionCount > 0 ? item.azCount / item.regionCount : 0
+        }))
+        .sort((a, b) => {
+            if (b.regionCount !== a.regionCount) return b.regionCount - a.regionCount;
+            return t(a.key).localeCompare(t(b.key), currentLang === 'zh' ? 'zh-CN' : currentLang);
+        });
+}
+
+function renderStatsSummary(statsRows) {
+    const container = document.getElementById('stats-summary');
+    if (!container) return;
+
+    const totalRegions = filteredRegions.length;
+    const totalAz = filteredRegions.reduce((sum, region) => sum + getRegionAzCount(region), 0);
+    const totalGroups = statsRows.length;
+
+    container.innerHTML = `
+        <div class="stats-summary-card">
+            <div class="stats-summary-label">${t('stats_summary_groups')}</div>
+            <div class="stats-summary-value">${totalGroups}</div>
+        </div>
+        <div class="stats-summary-card">
+            <div class="stats-summary-label">${t('stats_summary_regions')}</div>
+            <div class="stats-summary-value">${totalRegions}</div>
+        </div>
+        <div class="stats-summary-card">
+            <div class="stats-summary-label">${t('stats_summary_az')}</div>
+            <div class="stats-summary-value">${totalAz}</div>
+        </div>
+    `;
+}
+
+function renderStatsChart(statsRows) {
+    const chart = document.getElementById('stats-chart');
+    if (!chart) return;
+
+    if (!statsRows.length) {
+        chart.innerHTML = `<div class="empty-state"><p>${t('stats_empty')}</p></div>`;
+        return;
+    }
+
+    const maxRegionCount = Math.max(...statsRows.map(item => item.regionCount), 1);
+    const maxAzCount = Math.max(...statsRows.map(item => item.azCount), 1);
+
+    chart.innerHTML = statsRows.map(item => {
+        const regionWidth = (item.regionCount / maxRegionCount) * 100;
+        const azWidth = (item.azCount / maxAzCount) * 100;
+
+        return `
+            <div class="stats-chart-row">
+                <div class="stats-chart-label">${t(item.key)}</div>
+                <div class="stats-chart-bars">
+                    <div class="stats-chart-metric">
+                        <span class="stats-chart-metric-name">${t('stats_chart_regions')}</span>
+                        <div class="stats-bar-track">
+                            <div class="stats-bar stats-bar-regions" style="width: ${regionWidth}%"></div>
+                        </div>
+                        <span class="stats-chart-value">${item.regionCount}</span>
+                    </div>
+                    <div class="stats-chart-metric">
+                        <span class="stats-chart-metric-name">${t('stats_chart_az')}</span>
+                        <div class="stats-bar-track">
+                            <div class="stats-bar stats-bar-az" style="width: ${azWidth}%"></div>
+                        </div>
+                        <span class="stats-chart-value">${item.azCount}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderStatsTable(statsRows) {
+    const tbody = document.getElementById('stats-table-body');
+    if (!tbody) return;
+
+    if (!statsRows.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="stats-empty-cell">${t('stats_empty')}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = statsRows.map(item => `
+        <tr>
+            <td>${t(item.key)}</td>
+            <td>${item.regionCount}</td>
+            <td>${item.azCount}</td>
+            <td>${item.averageAzPerRegion.toFixed(2)}</td>
+        </tr>
+    `).join('');
+}
+
+function updateStatsView() {
+    const statsSelect = document.getElementById('statsDimension');
+    if (statsSelect) {
+        currentStatsDimension = statsSelect.value || currentStatsDimension;
+    }
+
+    const statsRows = buildStatsData(filteredRegions, currentStatsDimension);
+    renderStatsSummary(statsRows);
+    renderStatsChart(statsRows);
+    renderStatsTable(statsRows);
+
+    const dimensionHeader = document.querySelector('.stats-table thead th:first-child');
+    if (dimensionHeader) {
+        dimensionHeader.textContent = getStatsDimensionLabel(currentStatsDimension);
+    }
 }
 
 // Format AZ code by stripping region_code-related prefixes.
@@ -772,7 +950,7 @@ function switchView(mode) {
     // Update main layout for full width in table mode
     const mainElement = document.querySelector('main');
     if (mainElement) {
-        if (mode === 'table' || mode === 'changelog') {
+        if (mode === 'table' || mode === 'changelog' || mode === 'stats') {
             mainElement.classList.add('full-width');
         } else {
             mainElement.classList.remove('full-width');
@@ -814,6 +992,8 @@ function updateCurrentView() {
         updateTable();
     } else if (currentViewMode === 'changelog') {
         updateChangelogView();
+    } else if (currentViewMode === 'stats') {
+        updateStatsView();
     }
 }
 
