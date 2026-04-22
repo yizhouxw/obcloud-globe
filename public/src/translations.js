@@ -88,6 +88,9 @@ const translations = {
         // Sites
         '中国站': '中国站',
         '国际站': '国际站',
+        '中国站政务云': '中国站政务云',
+        '中国站金融云': '中国站金融云',
+        '阿里巴巴专属站': '阿里巴巴专属站',
 
         // Countries / Areas
         '中国': '中国',
@@ -112,6 +115,7 @@ const translations = {
         '中国站-官网渠道': '中国站-官网渠道',
         '中国站-精选商城': '中国站-精选商城',
         '中国站-自运营': '中国站-自运营',
+        '中国站-云市场': '中国站-云市场',
         '中国站-阿里巴巴 CC': '中国站-阿里巴巴 CC',
         '中国站-联营联运': '中国站-联营联运',
         '国际站-官网渠道': '国际站-官网渠道',
@@ -243,6 +247,9 @@ const translations = {
         // Sites
         '中国站': 'China Site',
         '国际站': 'International Site',
+        '中国站政务云': 'China Gov Cloud Site',
+        '中国站金融云': 'China Financial Cloud Site',
+        '阿里巴巴专属站': 'Alibaba Dedicated Site',
 
         // Countries / Areas
         '中国': 'China',
@@ -267,6 +274,7 @@ const translations = {
         '中国站-官网渠道': 'China Site - Official Website',
         '中国站-精选商城': 'China Site - Selected Mall',
         '中国站-自运营': 'China Site - Self-operated',
+        '中国站-云市场': 'China Site - Marketplace',
         '中国站-阿里巴巴 CC': 'China Site - Alibaba CC',
         '中国站-联营联运': 'China Site - Joint Operation',
         '国际站-官网渠道': 'International Site - Official Website',
@@ -400,6 +408,9 @@ const translations = {
         // Sites
         '中国站': '中国サイト',
         '国际站': '国際サイト',
+        '中国站政务云': '中国サイト（政務クラウド）',
+        '中国站金融云': '中国サイト（金融クラウド）',
+        '阿里巴巴专属站': 'Alibaba 専用サイト',
 
         // Countries / Areas
         '中国': '中国',
@@ -424,6 +435,7 @@ const translations = {
         '中国站-官网渠道': '中国サイト - 公式サイト',
         '中国站-精选商城': '中国サイト - 厳選モール',
         '中国站-自运营': '中国サイト - 自社運営',
+        '中国站-云市场': '中国サイト - マーケットプレイス',
         '中国站-阿里巴巴 CC': '中国サイト - Alibaba CC',
         '中国站-联营联运': '中国サイト - 共同運営',
         '国际站-官网渠道': '国際サイト - 公式サイト',
