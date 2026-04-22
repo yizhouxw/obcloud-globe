@@ -70,18 +70,14 @@
                     </button>
                 </nav>
                 <div class="filters">
-                    <select id="siteFilter" class="filter-select" aria-label="Filter by Site">
-                        <option value="" data-i18n="filter_all_sites">所有站点</option>
+                    <select id="siteFilter" class="filter-select" aria-label="Filter by Site (Multiple)" multiple>
                     </select>
-                    <select id="cloudProviderFilter" class="filter-select" aria-label="Filter by Cloud Provider">
-                        <option value="" data-i18n="filter_all_providers">所有云厂商</option>
+                    <select id="cloudProviderFilter" class="filter-select" aria-label="Filter by Cloud Provider (Multiple)" multiple>
                     </select>
-                    <select id="channelFilter" class="filter-select" aria-label="Filter by Channel">
-                        <option value="" data-i18n="filter_all_channels">所有渠道</option>
+                    <select id="channelFilter" class="filter-select" aria-label="Filter by Channel (Multiple)" multiple>
                     </select>
-                    <input type="text" id="regionFilter" class="filter-input" list="regionOptions" placeholder="搜索区域..." aria-label="Search Region" data-i18n="search_placeholder">
-                    <datalist id="regionOptions">
-                    </datalist>
+                    <select id="regionFilter" class="filter-select" aria-label="Filter by Region (Multiple)" multiple>
+                    </select>
                 </div>
             </div>
         </header>

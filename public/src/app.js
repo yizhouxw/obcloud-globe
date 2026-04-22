@@ -799,13 +799,19 @@ function formatAzName(region, az) {
     return az;
 }
 
+function getSelectedValues(selectId) {
+    const select = document.getElementById(selectId);
+    if (!select) return [];
+    return Array.from(select.selectedOptions).map(option => option.value).filter(Boolean);
+}
+
 // Initialize filter dropdowns
 function initializeFilters() {
     // Save current selections if any
-    const currentSite = document.getElementById('siteFilter') ? document.getElementById('siteFilter').value : '';
-    const currentProvider = document.getElementById('cloudProviderFilter') ? document.getElementById('cloudProviderFilter').value : '';
-    const currentChannel = document.getElementById('channelFilter') ? document.getElementById('channelFilter').value : '';
-    const currentRegion = document.getElementById('regionFilter') ? document.getElementById('regionFilter').value : '';
+    const currentSites = getSelectedValues('siteFilter');
+    const currentProviders = getSelectedValues('cloudProviderFilter');
+    const currentChannels = getSelectedValues('channelFilter');
+    const currentRegions = getSelectedValues('regionFilter');
 
     const cloudProviders = [...new Set(regionsData.map(r => r.cloud_provider))].sort();
 
@@ -862,69 +868,70 @@ function initializeFilters() {
 
     // Initialize site filter
     const siteSelect = document.getElementById('siteFilter');
-    siteSelect.innerHTML = `<option value="">${t('filter_all_sites')}</option>`;
+    siteSelect.innerHTML = '';
     sites.forEach(site => {
         const option = document.createElement('option');
         option.value = site;
         option.textContent = t(site);
+        option.selected = currentSites.includes(site);
         siteSelect.appendChild(option);
     });
-    if (currentSite) siteSelect.value = currentSite;
 
     // Initialize cloud provider filter
     const cloudProviderSelect = document.getElementById('cloudProviderFilter');
-    cloudProviderSelect.innerHTML = `<option value="">${t('filter_all_providers')}</option>`;
+    cloudProviderSelect.innerHTML = '';
     cloudProviders.forEach(provider => {
         const option = document.createElement('option');
         option.value = provider;
         option.textContent = t(provider);
+        option.selected = currentProviders.includes(provider);
         cloudProviderSelect.appendChild(option);
     });
-    if (currentProvider) cloudProviderSelect.value = currentProvider;
 
     // Initialize channel filter
     const channelSelect = document.getElementById('channelFilter');
-    channelSelect.innerHTML = `<option value="">${t('filter_all_channels')}</option>`;
+    channelSelect.innerHTML = '';
     channels.forEach(channel => {
         const option = document.createElement('option');
         option.value = channel;
         option.textContent = t(channel);
+        option.selected = currentChannels.includes(channel);
         channelSelect.appendChild(option);
     });
-    if (currentChannel) channelSelect.value = currentChannel;
 
-    // Initialize region filter with datalist for search
-    const regionDatalist = document.getElementById('regionOptions');
-    regionDatalist.innerHTML = '';
+    // Initialize region filter
+    const regionSelect = document.getElementById('regionFilter');
+    regionSelect.innerHTML = '';
     regions.forEach(region => {
         const option = document.createElement('option');
-        option.value = t(region); // Show translated value in datalist
-        regionDatalist.appendChild(option);
+        option.value = region;
+        option.textContent = t(region);
+        option.selected = currentRegions.includes(region);
+        regionSelect.appendChild(option);
     });
 }
 
 // Apply filters
 function applyFilters() {
-    const siteFilter = document.getElementById('siteFilter').value;
-    const cloudProviderFilter = document.getElementById('cloudProviderFilter').value;
-    const channelFilter = document.getElementById('channelFilter').value;
-    const regionFilter = document.getElementById('regionFilter').value.trim();
+    const siteFilters = getSelectedValues('siteFilter');
+    const cloudProviderFilters = getSelectedValues('cloudProviderFilter');
+    const channelFilters = getSelectedValues('channelFilter');
+    const regionFilters = getSelectedValues('regionFilter');
 
     filteredRegions = regionsData.filter(region => {
         // Match site (check if region has the selected site)
         const regionSites = getObcloudSites(region);
-        const matchSite = !siteFilter || regionSites.includes(siteFilter);
+        const matchSite = siteFilters.length === 0 || siteFilters.some(site => regionSites.includes(site));
 
         // Match cloud provider
-        const matchProvider = !cloudProviderFilter || region.cloud_provider === cloudProviderFilter;
+        const matchProvider = cloudProviderFilters.length === 0 || cloudProviderFilters.includes(region.cloud_provider);
 
         // Match channel (check if region has the selected channel)
-        const matchChannel = !channelFilter ||
-            (region.channels && Array.isArray(region.channels) && region.channels.includes(channelFilter));
+        const matchChannel = channelFilters.length === 0 ||
+            (region.channels && Array.isArray(region.channels) && channelFilters.some(channel => region.channels.includes(channel)));
 
-        // Match region with fuzzy search (case-insensitive)
-        const matchRegion = !regionFilter ||
-            t(region.region).toLowerCase().includes(regionFilter.toLowerCase());
+        // Match region by selected region items
+        const matchRegion = regionFilters.length === 0 || regionFilters.includes(region.region);
 
         return matchSite && matchProvider && matchChannel && matchRegion;
     });
