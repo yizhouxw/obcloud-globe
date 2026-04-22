@@ -11,6 +11,11 @@ let regionModal = null;
 let regionModalClose = null;
 let regionModalBackdrop = null;
 let regionModalBody = null;
+let changelogModal = null;
+let changelogModalClose = null;
+let changelogModalBackdrop = null;
+let changelogOpenBtn = null;
+let changelogLastFocus = null;
 let changelogEvents = [];
 let restoredState = null;
 let isRestoringState = false;
@@ -184,7 +189,7 @@ function isSidebarVisible() {
 
 function shouldUseModal() {
     // Use modal when on mobile, or when sidebar is hidden by responsive CSS
-    return isMobile() || !isSidebarVisible() || currentViewMode === 'table' || currentViewMode === 'changelog' || currentViewMode === 'stats';
+    return isMobile() || !isSidebarVisible() || currentViewMode === 'table' || currentViewMode === 'stats';
 }
 
 // Shorten legend labels on mobile (e.g., drop trailing "Cloud")
@@ -327,12 +332,16 @@ async function init() {
     await loadRegionsData();
     await loadChangelogData();
     setupRegionModal();
-    setupEventListeners();
+    setupChangelogModal();
     setupTableScrollSync();
+    setupEventListeners();
     initializeFilters();
     // Initialize sidebar to empty state
     resetSidebar();
-    const restoredView = restoredState && restoredState.viewMode ? restoredState.viewMode : 'globe';
+    let restoredView = restoredState && restoredState.viewMode ? restoredState.viewMode : 'globe';
+    if (restoredView === 'changelog') {
+        restoredView = 'globe';
+    }
     switchView(restoredView);
 
     if (restoredState && restoredState.statsDimension) {
@@ -387,6 +396,7 @@ async function loadChangelogData() {
     }
 
     changelogEvents = parseChangelogEvents(markdown);
+    updateChangelogView();
 }
 
 function parseChangelogEvents(markdownText) {
@@ -642,6 +652,28 @@ function setupEventListeners() {
     if (regionModalBackdrop) {
         regionModalBackdrop.addEventListener('click', hideRegionModal);
     }
+
+    if (changelogOpenBtn) {
+        changelogOpenBtn.addEventListener('click', showChangelogModal);
+    }
+    if (changelogModalClose) {
+        changelogModalClose.addEventListener('click', hideChangelogModal);
+    }
+    if (changelogModalBackdrop) {
+        changelogModalBackdrop.addEventListener('click', hideChangelogModal);
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        if (changelogModal && !changelogModal.classList.contains('hidden')) {
+            hideChangelogModal();
+            return;
+        }
+        if (regionModal && !regionModal.classList.contains('hidden')) {
+            hideRegionModal();
+        }
+    });
+
     window.addEventListener('resize', handleResponsiveSidebar);
 
     // Close popup when clicking outside
@@ -688,6 +720,41 @@ function setupRegionModal() {
     handleResponsiveSidebar();
 }
 
+function setupChangelogModal() {
+    changelogModal = document.getElementById('changelog-modal');
+    changelogModalClose = document.getElementById('changelog-modal-close');
+    changelogModalBackdrop = document.getElementById('changelog-modal-backdrop');
+    changelogOpenBtn = document.getElementById('changelog-open-btn');
+}
+
+function showChangelogModal() {
+    if (!changelogModal) return;
+    hideOverlappingMarkersPopup();
+    changelogLastFocus = document.activeElement;
+    updateChangelogView();
+    changelogModal.classList.remove('hidden');
+    changelogModal.setAttribute('aria-hidden', 'false');
+    if (changelogOpenBtn) {
+        changelogOpenBtn.setAttribute('aria-expanded', 'true');
+    }
+    if (changelogModalClose) {
+        changelogModalClose.focus();
+    }
+}
+
+function hideChangelogModal() {
+    if (!changelogModal) return;
+    changelogModal.classList.add('hidden');
+    changelogModal.setAttribute('aria-hidden', 'true');
+    if (changelogOpenBtn) {
+        changelogOpenBtn.setAttribute('aria-expanded', 'false');
+    }
+    if (changelogLastFocus && typeof changelogLastFocus.focus === 'function') {
+        changelogLastFocus.focus();
+    }
+    changelogLastFocus = null;
+}
+
 function showRegionModal(html) {
     if (!regionModal || !regionModalBody) return;
     regionModalBody.innerHTML = html;
@@ -704,7 +771,7 @@ function hideRegionModal() {
 function handleResponsiveSidebar() {
     const sidebar = document.getElementById('region-info-sidebar');
     if (!sidebar) return;
-    if (isMobile() || currentViewMode === 'table' || currentViewMode === 'changelog' || currentViewMode === 'stats') {
+    if (isMobile() || currentViewMode === 'table' || currentViewMode === 'stats') {
         sidebar.style.display = 'none';
     } else {
         sidebar.style.display = 'flex';
@@ -1166,7 +1233,7 @@ function switchView(mode) {
     // Update main layout for full width in table mode
     const mainElement = document.querySelector('main');
     if (mainElement) {
-        if (mode === 'table' || mode === 'changelog' || mode === 'stats') {
+        if (mode === 'table' || mode === 'stats') {
             mainElement.classList.add('full-width');
         } else {
             mainElement.classList.remove('full-width');
@@ -1207,8 +1274,6 @@ function updateCurrentView() {
         updateMap();
     } else if (currentViewMode === 'table') {
         updateTable();
-    } else if (currentViewMode === 'changelog') {
-        updateChangelogView();
     } else if (currentViewMode === 'stats') {
         updateStatsView();
     }

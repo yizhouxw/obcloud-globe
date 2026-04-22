@@ -44,6 +44,8 @@ const translations = {
         'changelog_title': '地域变更记录',
         'changelog_subtitle': '仅展示 3 类简化事件：地域上线、地域下线、地域新增可用区',
         'changelog_empty': '暂无可展示的变更记录',
+        'changelog_open_title': '打开变更记录',
+        'changelog_close_title': '关闭变更记录',
         'stats_title': '地域统计',
         'stats_subtitle': '按不同维度统计地域数量和可用区数据量',
         'stats_dimension_label': '统计维度',
@@ -211,6 +213,8 @@ const translations = {
         'changelog_title': 'Region Change Log',
         'changelog_subtitle': 'Only 3 simplified event types are shown: Region Launch, Region Offline, Region AZ Added',
         'changelog_empty': 'No change events available',
+        'changelog_open_title': 'Open change log',
+        'changelog_close_title': 'Close change log',
         'stats_title': 'Region Statistics',
         'stats_subtitle': 'Count regions and availability-zone volume by different dimensions',
         'stats_dimension_label': 'Dimension',
@@ -380,6 +384,8 @@ const translations = {
         'changelog_title': '地域変更履歴',
         'changelog_subtitle': '簡易イベント3種類のみ表示：地域上线・地域下线・地域新增可用区',
         'changelog_empty': '表示できる変更履歴がありません',
+        'changelog_open_title': '変更履歴を開く',
+        'changelog_close_title': '変更履歴を閉じる',
         'stats_title': '地域統計',
         'stats_subtitle': 'さまざまな軸で地域数とAZデータ量を集計します',
         'stats_dimension_label': '集計軸',
@@ -553,6 +559,10 @@ function setLanguage(lang) {
             }
         }
 
+        if (typeof updateChangelogView === 'function') {
+            updateChangelogView();
+        }
+
         // Update AMap language by dispatching an event
         const event = new CustomEvent('languageChanged', { detail: { lang: lang } });
         document.dispatchEvent(event);
@@ -588,6 +598,16 @@ function updatePageText() {
             element.title = translations[currentLang][key];
         } else {
             console.warn(`[i18n] Missing title translation for key "${key}" in language "${currentLang}"`);
+        }
+    });
+
+    // Handle aria-label attribute updates
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(element => {
+        const key = element.getAttribute('data-i18n-aria-label');
+        if (translations[currentLang][key]) {
+            element.setAttribute('aria-label', translations[currentLang][key]);
+        } else {
+            console.warn(`[i18n] Missing aria-label translation for key "${key}" in language "${currentLang}"`);
         }
     });
 

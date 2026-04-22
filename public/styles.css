@@ -44,6 +44,7 @@
     --z-legend: 100;
     --z-sidebar: 100;
     --z-popup: 2000;
+    --z-changelog-modal: 2100;
     --z-loading: 1000;
 }
 
@@ -104,10 +105,23 @@ header h1 {
     .notice-banner {
         padding: var(--spacing-sm) var(--spacing-md);
     }
+    .header-actions {
+        margin-left: auto;
+    }
+
     .github-link {
         width: 32px;
         height: 32px;
-        margin-left: auto;
+    }
+
+    .header-icon-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .header-icon {
+        width: 20px;
+        height: 20px;
     }
     
     .header-title-row {
@@ -198,6 +212,44 @@ header h1 {
     position: relative;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    z-index: 10;
+}
+
+.header-icon-btn {
+    appearance: none;
+    border: none;
+    color: var(--text-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    opacity: 0.9;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+}
+
+.header-icon-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.header-icon-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 2px;
+}
+
+.header-icon {
+    width: 22px;
+    height: 22px;
+}
+
 .github-link {
     color: var(--text-white);
     text-decoration: none;
@@ -231,13 +283,17 @@ header h1 {
     .header-title-row h1 {
         flex: 1;
     }
-    .github-link {
+    .header-actions {
         margin-left: var(--spacing-md);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .github-link {
+        transition: none;
+    }
+
+    .header-icon-btn {
         transition: none;
     }
 }
@@ -508,11 +564,6 @@ main.full-width {
     flex-direction: column;
 }
 
-/* Changelog View */
-#changelog-view {
-    background: var(--bg-white);
-}
-
 #stats-view {
     background: var(--bg-white);
 }
@@ -697,21 +748,6 @@ main.full-width {
 .stats-empty-cell {
     text-align: center;
     color: var(--text-light);
-}
-
-.changelog-container {
-    padding: var(--spacing-xl);
-    height: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.changelog-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    color: var(--text-main);
 }
 
 .changelog-subtitle {
@@ -1161,6 +1197,90 @@ main.full-width {
     border-bottom: none;
 }
 
+/* Change Log Modal */
+.changelog-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-changelog-modal);
+}
+
+.changelog-modal.hidden {
+    display: none;
+}
+
+.changelog-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.changelog-modal-content {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 24px);
+    max-width: 760px;
+    max-height: 85vh;
+    background: var(--bg-white);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.changelog-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--color-primary-gradient);
+    color: var(--text-white);
+}
+
+.changelog-modal-header h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.changelog-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-white);
+    font-size: 1.4rem;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.changelog-modal-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.changelog-modal-close:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 2px;
+}
+
+.changelog-modal-body {
+    padding: var(--spacing-lg);
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.changelog-modal-list {
+    flex: 1;
+    min-height: 200px;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     :root {
@@ -1245,10 +1365,6 @@ main.full-width {
     }
 
     .table-container {
-        padding: var(--spacing-md);
-    }
-
-    .changelog-container {
         padding: var(--spacing-md);
     }
 
