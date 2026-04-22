@@ -34,7 +34,7 @@ regions:
   obcloud_sites:
   - 国际站
   region: 东南亚-新加坡
-  launch_date: '2024-06-24'
+  launch_date: 待补充
   availability_zones:
   - asia-southeast1-a
   - asia-southeast1-b

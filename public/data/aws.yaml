@@ -211,6 +211,8 @@ regions:
   longitude: 101.6869
 - cloud_provider: AWS
   region_code: ap-southeast-7
+  obcloud_sites:
+  - 国际站
   region: 东南亚-曼谷
   launch_date: '2026-01-22'
   availability_zones:

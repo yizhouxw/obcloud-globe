@@ -28,6 +28,8 @@ regions:
   longitude: -78.6569
 - cloud_provider: Azure
   region_code: koreacentral
+  obcloud_sites:
+  - 国际站
   region: 东亚-韩国中部
   launch_date: '2025-12-29'
   availability_zones:
@@ -38,6 +40,8 @@ regions:
   longitude: 126.978
 - cloud_provider: Azure
   region_code: malaysiawest
+  obcloud_sites:
+  - 国际站
   region: 东南亚-马来西亚西部
   launch_date: '2026-01-28'
   availability_zones:

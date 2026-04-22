@@ -590,10 +590,18 @@ function getChannelHtml(channelName, region) {
 
 // Helper function to normalize obcloud_site (can be string or array)
 function getObcloudSites(region) {
+    const defaultSitesByProvider = {
+        AWS: '国际站',
+        Azure: '国际站'
+    };
+
     if (region.obcloud_sites) {
         return Array.isArray(region.obcloud_sites) ? region.obcloud_sites : [region.obcloud_sites];
     }
-    if (!region.obcloud_site) return [];
+    if (!region.obcloud_site) {
+        const fallbackSite = region && region.cloud_provider ? defaultSitesByProvider[region.cloud_provider] : '';
+        return fallbackSite ? [fallbackSite] : [];
+    }
     if (Array.isArray(region.obcloud_site)) {
         return region.obcloud_site;
     }
