@@ -303,6 +303,9 @@ header h1 {
     display: flex;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
+    align-items: center;
+    position: relative;
+    z-index: 20;
 }
 
 .filter-select,
@@ -318,19 +321,74 @@ header h1 {
     transition: box-shadow 0.2s ease;
 }
 
+.filter-dropdown {
+    position: relative;
+    min-width: 150px;
+}
+
+.filter-dropdown .filter-select {
+    width: 100%;
+}
+
 .filter-input {
     min-width: 200px;
     cursor: text;
 }
 
 .filter-select[multiple] {
-    min-height: 110px;
+    height: 38px;
+    max-height: 38px;
     cursor: default;
     padding: var(--spacing-sm);
+    overflow: hidden;
+}
+
+.filter-select[multiple].expanded {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    min-width: 220px;
+    height: 180px;
+    max-height: 180px;
+    overflow: auto;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    z-index: 200;
 }
 
 .filter-select[multiple] option {
     padding: 4px 6px;
+}
+
+.filter-reset-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-white);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.filter-reset-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.65);
+}
+
+.filter-reset-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 2px;
+}
+
+.filter-summary {
+    margin-top: var(--spacing-sm);
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+    word-break: break-word;
 }
 
 .filter-select:focus,
@@ -1150,6 +1208,7 @@ main.full-width {
     
     .view-mode-selector,
     .filters,
+    .filter-dropdown,
     .filter-select,
     .filter-input {
         width: 100%;
@@ -1160,7 +1219,18 @@ main.full-width {
     }
 
     .filter-select[multiple] {
-        min-height: 96px;
+        height: 38px;
+        max-height: 38px;
+    }
+
+    .filter-select[multiple].expanded {
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+        min-width: 100%;
+        height: 160px;
+        max-height: 160px;
     }
     
     .main-content {

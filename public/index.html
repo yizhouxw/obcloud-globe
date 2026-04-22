@@ -70,16 +70,26 @@
                     </button>
                 </nav>
                 <div class="filters">
-                    <select id="siteFilter" class="filter-select" aria-label="Filter by Site (Multiple)" multiple>
-                    </select>
-                    <select id="cloudProviderFilter" class="filter-select" aria-label="Filter by Cloud Provider (Multiple)" multiple>
-                    </select>
-                    <select id="channelFilter" class="filter-select" aria-label="Filter by Channel (Multiple)" multiple>
-                    </select>
-                    <select id="regionFilter" class="filter-select" aria-label="Filter by Region (Multiple)" multiple>
-                    </select>
+                    <div class="filter-dropdown">
+                        <select id="siteFilter" class="filter-select" aria-label="Filter by Site (Multiple)" multiple>
+                        </select>
+                    </div>
+                    <div class="filter-dropdown">
+                        <select id="cloudProviderFilter" class="filter-select" aria-label="Filter by Cloud Provider (Multiple)" multiple>
+                        </select>
+                    </div>
+                    <div class="filter-dropdown">
+                        <select id="channelFilter" class="filter-select" aria-label="Filter by Channel (Multiple)" multiple>
+                        </select>
+                    </div>
+                    <div class="filter-dropdown">
+                        <select id="regionFilter" class="filter-select" aria-label="Filter by Region (Multiple)" multiple>
+                        </select>
+                    </div>
+                    <button id="resetFiltersBtn" type="button" class="filter-reset-btn" data-i18n="filters_reset">重置筛选</button>
                 </div>
             </div>
+            <div id="filter-summary" class="filter-summary" data-i18n="filter_summary_all">当前筛选：全部</div>
         </header>
 
         <main>

@@ -12,6 +12,11 @@ let regionModalClose = null;
 let regionModalBackdrop = null;
 let regionModalBody = null;
 let changelogEvents = [];
+let restoredState = null;
+let isRestoringState = false;
+
+const APP_STATE_COOKIE_KEY = 'obcloud_ui_state';
+const ALL_FILTER_VALUE = '__ALL__';
 
 // Globe components
 let currentGlobe = null;
@@ -212,8 +217,106 @@ function setupNoticeBanner() {
     });
 }
 
+function setCookie(name, value, days = 365) {
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function getCookie(name) {
+    const target = `${encodeURIComponent(name)}=`;
+    const cookies = document.cookie ? document.cookie.split('; ') : [];
+    for (const cookie of cookies) {
+        if (cookie.startsWith(target)) {
+            return decodeURIComponent(cookie.slice(target.length));
+        }
+    }
+    return '';
+}
+
+function loadPersistedState() {
+    try {
+        const raw = getCookie(APP_STATE_COOKIE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+    } catch (error) {
+        console.warn('[State] Failed to parse persisted state cookie:', error);
+        return null;
+    }
+}
+
+function savePersistedState() {
+    if (isRestoringState) return;
+    const state = {
+        lang: currentLang,
+        viewMode: currentViewMode,
+        statsDimension: currentStatsDimension,
+        globeStyle: currentGlobeStyle,
+        filters: {
+            sites: getSelectedValues('siteFilter'),
+            providers: getSelectedValues('cloudProviderFilter'),
+            channels: getSelectedValues('channelFilter'),
+            regions: getSelectedValues('regionFilter')
+        }
+    };
+    setCookie(APP_STATE_COOKIE_KEY, JSON.stringify(state));
+}
+
+function formatSelectedFilterValues(values) {
+    if (!values || values.length === 0) {
+        return t('filter_all_short');
+    }
+    if (values.length <= 2) {
+        return values.map(value => t(value)).join(', ');
+    }
+    return `${t(values[0])}, ${t(values[1])} +${values.length - 2}`;
+}
+
+function renderFilterSummary() {
+    const summaryEl = document.getElementById('filter-summary');
+    if (!summaryEl) return;
+
+    const sites = getSelectedValues('siteFilter');
+    const providers = getSelectedValues('cloudProviderFilter');
+    const channels = getSelectedValues('channelFilter');
+    const regions = getSelectedValues('regionFilter');
+
+    const isAll = sites.length === 0 && providers.length === 0 && channels.length === 0 && regions.length === 0;
+    if (isAll) {
+        summaryEl.textContent = t('filter_summary_all');
+        return;
+    }
+
+    summaryEl.textContent = [
+        `${t('filter_label_site')}: ${formatSelectedFilterValues(sites)}`,
+        `${t('filter_label_provider')}: ${formatSelectedFilterValues(providers)}`,
+        `${t('filter_label_channel')}: ${formatSelectedFilterValues(channels)}`,
+        `${t('filter_label_region')}: ${formatSelectedFilterValues(regions)}`
+    ].join(' | ');
+}
+
+function resetFilters() {
+    ['siteFilter', 'cloudProviderFilter', 'channelFilter', 'regionFilter'].forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        Array.from(select.options).forEach(option => {
+            option.selected = option.value === ALL_FILTER_VALUE;
+        });
+    });
+    applyFilters();
+}
+
+function applyRestoredLanguage() {
+    restoredState = loadPersistedState();
+    if (!restoredState || !restoredState.lang) return;
+    if (translations && translations[restoredState.lang]) {
+        currentLang = restoredState.lang;
+    }
+}
+
 // Initialize application
 async function init() {
+    applyRestoredLanguage();
+
     // Load map script with current language
     loadAMapScript(currentLang);
 
@@ -229,7 +332,29 @@ async function init() {
     initializeFilters();
     // Initialize sidebar to empty state
     resetSidebar();
-    switchView('globe');
+    const restoredView = restoredState && restoredState.viewMode ? restoredState.viewMode : 'globe';
+    switchView(restoredView);
+
+    if (restoredState && restoredState.statsDimension) {
+        currentStatsDimension = restoredState.statsDimension;
+        const statsDimensionSelect = document.getElementById('statsDimension');
+        if (statsDimensionSelect) {
+            statsDimensionSelect.value = currentStatsDimension;
+        }
+    }
+
+    if (restoredState && restoredState.globeStyle) {
+        currentGlobeStyle = restoredState.globeStyle;
+        const styleSelect = document.getElementById('globeStyleSelect');
+        if (styleSelect) {
+            styleSelect.value = currentGlobeStyle;
+        }
+    }
+
+    isRestoringState = true;
+    applyFilters();
+    isRestoringState = false;
+    savePersistedState();
 
     // Listen for language changes
     document.addEventListener('languageChanged', (e) => {
@@ -445,7 +570,7 @@ function setupEventListeners() {
     document.getElementById('siteFilter').addEventListener('change', applyFilters);
     document.getElementById('cloudProviderFilter').addEventListener('change', applyFilters);
     document.getElementById('channelFilter').addEventListener('change', applyFilters);
-    document.getElementById('regionFilter').addEventListener('input', applyFilters);
+    document.getElementById('regionFilter').addEventListener('change', applyFilters);
 
     // Language selector
     const languageSelect = document.getElementById('languageSelect');
@@ -455,6 +580,7 @@ function setupEventListeners() {
         }
         languageSelect.addEventListener('change', (e) => {
             setLanguage(e.target.value);
+            savePersistedState();
         });
     }
 
@@ -466,15 +592,39 @@ function setupEventListeners() {
             if (currentViewMode === 'globe') {
                 initGlobe(true); // force re-init
             }
+            savePersistedState();
         });
     }
 
     const statsDimensionSelect = document.getElementById('statsDimension');
     if (statsDimensionSelect) {
+        statsDimensionSelect.addEventListener('focus', () => {
+            statsDimensionSelect.classList.add('expanded');
+        });
+        statsDimensionSelect.addEventListener('blur', () => {
+            statsDimensionSelect.classList.remove('expanded');
+        });
         statsDimensionSelect.addEventListener('change', (e) => {
             currentStatsDimension = e.target.value;
             updateStatsView();
+            savePersistedState();
         });
+    }
+
+    ['siteFilter', 'cloudProviderFilter', 'channelFilter', 'regionFilter'].forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.addEventListener('focus', () => {
+            select.classList.add('expanded');
+        });
+        select.addEventListener('blur', () => {
+            select.classList.remove('expanded');
+        });
+    });
+
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', resetFilters);
     }
 
     // Close overlapping markers popup
@@ -815,16 +965,37 @@ function formatAzName(region, az) {
 function getSelectedValues(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return [];
-    return Array.from(select.selectedOptions).map(option => option.value).filter(Boolean);
+    const selectedValues = Array.from(select.selectedOptions).map(option => option.value).filter(Boolean);
+
+    if (!selectedValues.includes(ALL_FILTER_VALUE)) {
+        return selectedValues;
+    }
+
+    if (selectedValues.length === 1) {
+        return [];
+    }
+
+    Array.from(select.options).forEach(option => {
+        option.selected = option.value === ALL_FILTER_VALUE;
+    });
+    return [];
 }
 
 // Initialize filter dropdowns
 function initializeFilters() {
     // Save current selections if any
-    const currentSites = getSelectedValues('siteFilter');
-    const currentProviders = getSelectedValues('cloudProviderFilter');
-    const currentChannels = getSelectedValues('channelFilter');
-    const currentRegions = getSelectedValues('regionFilter');
+    const currentSites = restoredState && restoredState.filters && Array.isArray(restoredState.filters.sites)
+        ? restoredState.filters.sites
+        : getSelectedValues('siteFilter');
+    const currentProviders = restoredState && restoredState.filters && Array.isArray(restoredState.filters.providers)
+        ? restoredState.filters.providers
+        : getSelectedValues('cloudProviderFilter');
+    const currentChannels = restoredState && restoredState.filters && Array.isArray(restoredState.filters.channels)
+        ? restoredState.filters.channels
+        : getSelectedValues('channelFilter');
+    const currentRegions = restoredState && restoredState.filters && Array.isArray(restoredState.filters.regions)
+        ? restoredState.filters.regions
+        : getSelectedValues('regionFilter');
 
     const cloudProviders = [...new Set(regionsData.map(r => r.cloud_provider))].sort();
 
@@ -882,6 +1053,11 @@ function initializeFilters() {
     // Initialize site filter
     const siteSelect = document.getElementById('siteFilter');
     siteSelect.innerHTML = '';
+    const allSitesOption = document.createElement('option');
+    allSitesOption.value = ALL_FILTER_VALUE;
+    allSitesOption.textContent = t('filter_all_sites');
+    allSitesOption.selected = currentSites.length === 0;
+    siteSelect.appendChild(allSitesOption);
     sites.forEach(site => {
         const option = document.createElement('option');
         option.value = site;
@@ -893,6 +1069,11 @@ function initializeFilters() {
     // Initialize cloud provider filter
     const cloudProviderSelect = document.getElementById('cloudProviderFilter');
     cloudProviderSelect.innerHTML = '';
+    const allProvidersOption = document.createElement('option');
+    allProvidersOption.value = ALL_FILTER_VALUE;
+    allProvidersOption.textContent = t('filter_all_providers');
+    allProvidersOption.selected = currentProviders.length === 0;
+    cloudProviderSelect.appendChild(allProvidersOption);
     cloudProviders.forEach(provider => {
         const option = document.createElement('option');
         option.value = provider;
@@ -904,6 +1085,11 @@ function initializeFilters() {
     // Initialize channel filter
     const channelSelect = document.getElementById('channelFilter');
     channelSelect.innerHTML = '';
+    const allChannelsOption = document.createElement('option');
+    allChannelsOption.value = ALL_FILTER_VALUE;
+    allChannelsOption.textContent = t('filter_all_channels');
+    allChannelsOption.selected = currentChannels.length === 0;
+    channelSelect.appendChild(allChannelsOption);
     channels.forEach(channel => {
         const option = document.createElement('option');
         option.value = channel;
@@ -915,6 +1101,11 @@ function initializeFilters() {
     // Initialize region filter
     const regionSelect = document.getElementById('regionFilter');
     regionSelect.innerHTML = '';
+    const allRegionsOption = document.createElement('option');
+    allRegionsOption.value = ALL_FILTER_VALUE;
+    allRegionsOption.textContent = t('filter_all_regions');
+    allRegionsOption.selected = currentRegions.length === 0;
+    regionSelect.appendChild(allRegionsOption);
     regions.forEach(region => {
         const option = document.createElement('option');
         option.value = region;
@@ -922,6 +1113,9 @@ function initializeFilters() {
         option.selected = currentRegions.includes(region);
         regionSelect.appendChild(option);
     });
+
+    restoredState = null;
+    renderFilterSummary();
 }
 
 // Apply filters
@@ -950,6 +1144,8 @@ function applyFilters() {
     });
 
     updateCurrentView();
+    renderFilterSummary();
+    savePersistedState();
 }
 
 // Switch view mode
@@ -1000,6 +1196,7 @@ function switchView(mode) {
     }
 
     updateCurrentView();
+    savePersistedState();
 }
 
 // Update current view with filtered data
