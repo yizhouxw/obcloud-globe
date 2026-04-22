@@ -614,12 +614,9 @@ function getRegionCountry(regionName) {
     return country || t('stats_unknown');
 }
 
-function getRegionAzKeys(region) {
-    if (!region || region.is_offline || !Array.isArray(region.availability_zones)) return [];
-    const provider = region.cloud_provider || 'unknown-provider';
-    return region.availability_zones
-        .filter(az => typeof az === 'string' && az.trim().length > 0)
-        .map(az => `${provider}::${az}`);
+function getRegionAzCount(region) {
+    if (!region || region.is_offline || !Array.isArray(region.availability_zones)) return 0;
+    return region.availability_zones.filter(az => typeof az === 'string' && az.trim().length > 0).length;
 }
 
 function getStatsDimensionValues(region, dimension) {
@@ -660,19 +657,18 @@ function buildStatsData(regions, dimension) {
                 groups.set(value, {
                     key: value,
                     regionCount: 0,
-                    azKeys: new Set()
+                    azCount: 0
                 });
             }
             const item = groups.get(value);
             item.regionCount += 1;
-            getRegionAzKeys(region).forEach(azKey => item.azKeys.add(azKey));
+            item.azCount += getRegionAzCount(region);
         });
     });
 
     return Array.from(groups.values())
         .map(item => ({
             ...item,
-            azCount: item.azKeys.size,
             averageAzPerRegion: item.regionCount > 0 ? item.azCount / item.regionCount : 0
         }))
         .sort((a, b) => {
@@ -686,11 +682,7 @@ function renderStatsSummary(statsRows) {
     if (!container) return;
 
     const totalRegions = filteredRegions.length;
-    const totalAzKeys = new Set();
-    filteredRegions.forEach(region => {
-        getRegionAzKeys(region).forEach(azKey => totalAzKeys.add(azKey));
-    });
-    const totalAz = totalAzKeys.size;
+    const totalAz = filteredRegions.reduce((sum, region) => sum + getRegionAzCount(region), 0);
     const totalGroups = statsRows.length;
 
     container.innerHTML = `
