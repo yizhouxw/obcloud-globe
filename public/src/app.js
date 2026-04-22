@@ -681,8 +681,13 @@ function renderStatsSummary(statsRows) {
     const container = document.getElementById('stats-summary');
     if (!container) return;
 
-    const totalRegions = filteredRegions.length;
-    const totalAz = filteredRegions.reduce((sum, region) => sum + getRegionAzCount(region), 0);
+    const isExpandedDimension = currentStatsDimension === 'site' || currentStatsDimension === 'channel';
+    const totalRegions = isExpandedDimension
+        ? statsRows.reduce((sum, item) => sum + item.regionCount, 0)
+        : filteredRegions.length;
+    const totalAz = isExpandedDimension
+        ? statsRows.reduce((sum, item) => sum + item.azCount, 0)
+        : filteredRegions.reduce((sum, region) => sum + getRegionAzCount(region), 0);
     const totalGroups = statsRows.length;
 
     container.innerHTML = `
