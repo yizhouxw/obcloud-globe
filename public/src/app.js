@@ -21,7 +21,11 @@ let restoredState = null;
 let isRestoringState = false;
 
 const APP_STATE_COOKIE_KEY = 'obcloud_ui_state';
-const ALL_FILTER_VALUE = '__ALL__';
+const NOTICE_DISMISSED_COOKIE_KEY = 'obcloud_notice_dismissed';
+
+const FILTER_SELECT_IDS = ['siteFilter', 'cloudProviderFilter', 'channelFilter', 'regionFilter'];
+
+let filterNativeFallbackBound = false;
 
 // Globe components
 let currentGlobe = null;
@@ -201,17 +205,32 @@ function getLegendLabel(provider) {
     return label;
 }
 
-// Dismissible notice banner (session only, reappears on reload)
+function isNoticeDismissedPersisted() {
+    return getCookie(NOTICE_DISMISSED_COOKIE_KEY) === '1';
+}
+
+// Dismissible notice banner; closing is remembered via cookie
 function dismissNoticeBanner() {
     const banner = document.getElementById('notice-banner');
     if (!banner) return;
     banner.classList.add('notice-hidden');
+    setCookie(NOTICE_DISMISSED_COOKIE_KEY, '1', 3650);
+}
+
+function applyPersistedNoticeDismissal() {
+    const banner = document.getElementById('notice-banner');
+    if (!banner) return;
+    if (isNoticeDismissedPersisted()) {
+        banner.classList.add('notice-hidden');
+    }
 }
 
 function setupNoticeBanner() {
     const banner = document.getElementById('notice-banner');
     const closeBtn = document.getElementById('notice-banner-close');
     if (!banner || !closeBtn) return;
+
+    applyPersistedNoticeDismissal();
 
     closeBtn.addEventListener('click', dismissNoticeBanner);
     closeBtn.addEventListener('keydown', (e) => {
@@ -276,6 +295,29 @@ function formatSelectedFilterValues(values) {
     return `${t(values[0])}, ${t(values[1])} +${values.length - 2}`;
 }
 
+function getActiveFilterDimensionCount() {
+    let n = 0;
+    if (getSelectedValues('siteFilter').length) n++;
+    if (getSelectedValues('cloudProviderFilter').length) n++;
+    if (getSelectedValues('channelFilter').length) n++;
+    if (getSelectedValues('regionFilter').length) n++;
+    return n;
+}
+
+function updateFilterActiveBadge() {
+    const badge = document.getElementById('filter-active-badge');
+    if (!badge) return;
+    const n = getActiveFilterDimensionCount();
+    if (n === 0) {
+        badge.classList.add('hidden');
+        badge.textContent = '';
+        badge.removeAttribute('title');
+        return;
+    }
+    badge.classList.remove('hidden');
+    badge.textContent = String(n);
+}
+
 function renderFilterSummary() {
     const summaryEl = document.getElementById('filter-summary');
     if (!summaryEl) return;
@@ -288,26 +330,154 @@ function renderFilterSummary() {
     const isAll = sites.length === 0 && providers.length === 0 && channels.length === 0 && regions.length === 0;
     if (isAll) {
         summaryEl.textContent = t('filter_summary_all');
-        return;
+    } else {
+        summaryEl.textContent = [
+            `${t('filter_label_site')}: ${formatSelectedFilterValues(sites)}`,
+            `${t('filter_label_provider')}: ${formatSelectedFilterValues(providers)}`,
+            `${t('filter_label_channel')}: ${formatSelectedFilterValues(channels)}`,
+            `${t('filter_label_region')}: ${formatSelectedFilterValues(regions)}`
+        ].join(' | ');
     }
+    updateFilterActiveBadge();
+}
 
-    summaryEl.textContent = [
-        `${t('filter_label_site')}: ${formatSelectedFilterValues(sites)}`,
-        `${t('filter_label_provider')}: ${formatSelectedFilterValues(providers)}`,
-        `${t('filter_label_channel')}: ${formatSelectedFilterValues(channels)}`,
-        `${t('filter_label_region')}: ${formatSelectedFilterValues(regions)}`
-    ].join(' | ');
+function isFilterPanelOpen() {
+    const panel = document.getElementById('filter-panel');
+    return !!(panel && !panel.hidden);
+}
+
+function closeFilterTomSelectDropdowns() {
+    FILTER_SELECT_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.tomselect && typeof el.tomselect.close === 'function') {
+            el.tomselect.close();
+        }
+    });
+}
+
+function setFilterPanelOpen(open) {
+    const panel = document.getElementById('filter-panel');
+    const toggle = document.getElementById('filters-toggle-btn');
+    if (!panel || !toggle) return;
+    if (!open) {
+        closeFilterTomSelectDropdowns();
+    }
+    panel.hidden = !open;
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function toggleFilterPanel() {
+    setFilterPanelOpen(!isFilterPanelOpen());
+}
+
+/**
+ * Tom Select mounts the dropdown on document.body; clicks on option text often target a Text node
+ * (no Element#closest). Without this, the global "click outside" handler closes the panel and breaks
+ * search / selection.
+ */
+function clickEventInvolvesFilterUi(e) {
+    const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+    for (let i = 0; i < path.length; i++) {
+        const n = path[i];
+        if (!(n instanceof Element)) continue;
+        if (n.id === 'filter-panel' || n.id === 'filters-toggle-btn') return true;
+        if (n.classList && (n.classList.contains('ts-dropdown') || n.classList.contains('ts-dropdown-content'))) {
+            return true;
+        }
+        if (typeof n.closest === 'function') {
+            if (n.closest('#filter-panel') || n.closest('#filters-toggle-btn')) return true;
+            if (n.closest('.ts-dropdown')) return true;
+        }
+    }
+    const t = e.target;
+    const el = t instanceof Element ? t : t && t.parentElement;
+    if (el && typeof el.closest === 'function') {
+        if (el.closest('#filter-panel') || el.closest('#filters-toggle-btn') || el.closest('.ts-dropdown')) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function setupFilterPanelControls() {
+    const toggle = document.getElementById('filters-toggle-btn');
+    const panel = document.getElementById('filter-panel');
+    if (!toggle || !panel) return;
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFilterPanel();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!isFilterPanelOpen()) return;
+        if (clickEventInvolvesFilterUi(e)) return;
+        setFilterPanelOpen(false);
+    });
 }
 
 function resetFilters() {
-    ['siteFilter', 'cloudProviderFilter', 'channelFilter', 'regionFilter'].forEach(selectId => {
+    FILTER_SELECT_IDS.forEach(selectId => {
         const select = document.getElementById(selectId);
         if (!select) return;
-        Array.from(select.options).forEach(option => {
-            option.selected = option.value === ALL_FILTER_VALUE;
-        });
+        if (select.tomselect) {
+            select.tomselect.clear(true);
+        } else {
+            Array.from(select.options).forEach(option => { option.selected = false; });
+        }
     });
     applyFilters();
+}
+
+function destroyFilterTomSelects() {
+    FILTER_SELECT_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.tomselect) {
+            el.tomselect.destroy();
+        }
+    });
+}
+
+function setupFilterTomSelects() {
+    if (typeof TomSelect === 'undefined') {
+        console.warn('[Filters] Tom Select failed to load; using native multi-select.');
+        if (!filterNativeFallbackBound) {
+            filterNativeFallbackBound = true;
+            FILTER_SELECT_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', applyFilters);
+            });
+        }
+        return;
+    }
+    const placeholder = t('filters_search');
+    FILTER_SELECT_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el || el.tomselect) return;
+        try {
+            // Tom Select: searchable multi-select with chip removal.
+            const ts = new TomSelect(el, {
+                plugins: ['remove_button'],
+                maxItems: null,
+                create: false,
+                persist: false,
+                hideSelected: false,
+                closeAfterSelect: false,
+                openOnFocus: true,
+                maxOptions: 1000,
+                placeholder,
+                onChange() {
+                    applyFilters();
+                }
+            });
+            ts.control.addEventListener('click', () => ts.focus());
+            if (ts.control_input) {
+                ts.control_input.addEventListener('focus', () => ts.open());
+            }
+        } catch (err) {
+            console.error('[Filters] Tom Select init failed:', id, err);
+        }
+    });
 }
 
 function applyRestoredLanguage() {
@@ -576,12 +746,6 @@ function setupEventListeners() {
         });
     });
 
-    // Filter selects and input
-    document.getElementById('siteFilter').addEventListener('change', applyFilters);
-    document.getElementById('cloudProviderFilter').addEventListener('change', applyFilters);
-    document.getElementById('channelFilter').addEventListener('change', applyFilters);
-    document.getElementById('regionFilter').addEventListener('change', applyFilters);
-
     // Language selector
     const languageSelect = document.getElementById('languageSelect');
     if (languageSelect) {
@@ -621,21 +785,17 @@ function setupEventListeners() {
         });
     }
 
-    ['siteFilter', 'cloudProviderFilter', 'channelFilter', 'regionFilter'].forEach(selectId => {
-        const select = document.getElementById(selectId);
-        if (!select) return;
-        select.addEventListener('focus', () => {
-            select.classList.add('expanded');
-        });
-        select.addEventListener('blur', () => {
-            select.classList.remove('expanded');
-        });
-    });
-
     const resetFiltersBtn = document.getElementById('resetFiltersBtn');
     if (resetFiltersBtn) {
         resetFiltersBtn.addEventListener('click', resetFilters);
     }
+
+    const filterPanelDoneBtn = document.getElementById('filter-panel-done-btn');
+    if (filterPanelDoneBtn) {
+        filterPanelDoneBtn.addEventListener('click', () => setFilterPanelOpen(false));
+    }
+
+    setupFilterPanelControls();
 
     // Close overlapping markers popup
     const closePopupBtn = document.getElementById('close-overlapping-popup');
@@ -665,6 +825,10 @@ function setupEventListeners() {
 
     window.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
+        if (isFilterPanelOpen()) {
+            setFilterPanelOpen(false);
+            return;
+        }
         if (changelogModal && !changelogModal.classList.contains('hidden')) {
             hideChangelogModal();
             return;
@@ -1032,24 +1196,15 @@ function formatAzName(region, az) {
 function getSelectedValues(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return [];
-    const selectedValues = Array.from(select.selectedOptions).map(option => option.value).filter(Boolean);
-
-    if (!selectedValues.includes(ALL_FILTER_VALUE)) {
-        return selectedValues;
-    }
-
-    if (selectedValues.length === 1) {
-        return [];
-    }
-
-    Array.from(select.options).forEach(option => {
-        option.selected = option.value === ALL_FILTER_VALUE;
-    });
-    return [];
+    return Array.from(select.selectedOptions)
+        .map(option => option.value)
+        .filter(v => v != null && String(v).length > 0);
 }
 
 // Initialize filter dropdowns
 function initializeFilters() {
+    destroyFilterTomSelects();
+
     // Save current selections if any
     const currentSites = restoredState && restoredState.filters && Array.isArray(restoredState.filters.sites)
         ? restoredState.filters.sites
@@ -1117,14 +1272,9 @@ function initializeFilters() {
     });
     const sites = [...allSites].sort();
 
-    // Initialize site filter
+    // Initialize site filter (empty selection = all sites)
     const siteSelect = document.getElementById('siteFilter');
     siteSelect.innerHTML = '';
-    const allSitesOption = document.createElement('option');
-    allSitesOption.value = ALL_FILTER_VALUE;
-    allSitesOption.textContent = t('filter_all_sites');
-    allSitesOption.selected = currentSites.length === 0;
-    siteSelect.appendChild(allSitesOption);
     sites.forEach(site => {
         const option = document.createElement('option');
         option.value = site;
@@ -1133,14 +1283,8 @@ function initializeFilters() {
         siteSelect.appendChild(option);
     });
 
-    // Initialize cloud provider filter
     const cloudProviderSelect = document.getElementById('cloudProviderFilter');
     cloudProviderSelect.innerHTML = '';
-    const allProvidersOption = document.createElement('option');
-    allProvidersOption.value = ALL_FILTER_VALUE;
-    allProvidersOption.textContent = t('filter_all_providers');
-    allProvidersOption.selected = currentProviders.length === 0;
-    cloudProviderSelect.appendChild(allProvidersOption);
     cloudProviders.forEach(provider => {
         const option = document.createElement('option');
         option.value = provider;
@@ -1149,14 +1293,8 @@ function initializeFilters() {
         cloudProviderSelect.appendChild(option);
     });
 
-    // Initialize channel filter
     const channelSelect = document.getElementById('channelFilter');
     channelSelect.innerHTML = '';
-    const allChannelsOption = document.createElement('option');
-    allChannelsOption.value = ALL_FILTER_VALUE;
-    allChannelsOption.textContent = t('filter_all_channels');
-    allChannelsOption.selected = currentChannels.length === 0;
-    channelSelect.appendChild(allChannelsOption);
     channels.forEach(channel => {
         const option = document.createElement('option');
         option.value = channel;
@@ -1165,14 +1303,8 @@ function initializeFilters() {
         channelSelect.appendChild(option);
     });
 
-    // Initialize region filter
     const regionSelect = document.getElementById('regionFilter');
     regionSelect.innerHTML = '';
-    const allRegionsOption = document.createElement('option');
-    allRegionsOption.value = ALL_FILTER_VALUE;
-    allRegionsOption.textContent = t('filter_all_regions');
-    allRegionsOption.selected = currentRegions.length === 0;
-    regionSelect.appendChild(allRegionsOption);
     regions.forEach(region => {
         const option = document.createElement('option');
         option.value = region;
@@ -1180,6 +1312,8 @@ function initializeFilters() {
         option.selected = currentRegions.includes(region);
         regionSelect.appendChild(option);
     });
+
+    setupFilterTomSelects();
 
     restoredState = null;
     renderFilterSummary();
@@ -1218,6 +1352,7 @@ function applyFilters() {
 // Switch view mode
 function switchView(mode) {
     currentViewMode = mode;
+    setFilterPanelOpen(false);
 
     // Reset selected region and sidebar to empty state
     selectedRegion = null;

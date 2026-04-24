@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.default.min.css" crossorigin="anonymous">
     <!-- Three.js for 3D Globe -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- 高德地图配置 -->
@@ -31,32 +32,20 @@
                 </div>
                 <button id="notice-banner-close" class="notice-close-btn" type="button" aria-label="Close notice" data-i18n-title="notice_close" onclick="dismissNoticeBanner()">×</button>
             </div>
-            <div class="header-title-row">
-                <h1 data-i18n="app_title">OB Cloud 全球地域分布</h1>
-                <div class="header-actions">
-                    <button type="button" id="changelog-open-btn" class="header-icon-btn" data-i18n-title="changelog_open_title" data-i18n-aria-label="changelog_open_title" aria-haspopup="dialog" aria-controls="changelog-modal" aria-expanded="false">
-                        <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                            <path d="M3 3v5h5"/>
-                            <path d="M12 7v5l4 2"/>
-                        </svg>
-                    </button>
-                    <a href="https://github.com/yizhouxw/obcloud-globe" target="_blank" class="github-link" aria-label="View on GitHub">
-                        <svg height="24" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="24" data-view-component="true" class="octicon octicon-mark-github">
-                            <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.46-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z" fill="currentColor"></path>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-            <div class="header-controls">
-                <div class="lang-selector" style="margin-right: 1rem;">
-                    <select id="languageSelect" class="filter-select" aria-label="Select Language">
-                        <option value="zh">中文</option>
-                        <option value="en">English</option>
-                        <option value="ja">日本語</option>
-                    </select>
-                </div>
-                <nav class="view-mode-selector" role="tablist">
+            <script>
+                (function () {
+                    try {
+                        if (document.cookie.indexOf('obcloud_notice_dismissed=1') !== -1) {
+                            var b = document.getElementById('notice-banner');
+                            if (b) b.classList.add('notice-hidden');
+                        }
+                    } catch (e) { /* ignore */ }
+                })();
+            </script>
+            <div class="header-top-bar">
+                <h1 class="header-top-title" data-i18n="app_title">OB Cloud 全球地域分布</h1>
+                <div class="header-top-middle">
+                    <nav class="view-mode-selector" role="tablist" aria-label="View mode">
                     <button type="button" class="view-mode-btn active" role="tab" data-mode="globe" data-i18n-title="view_globe_title" aria-selected="true">
                         <svg class="view-mode-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                         <span data-i18n="view_globe">地球</span>
@@ -73,28 +62,74 @@
                         <svg class="view-mode-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                         <span data-i18n="view_stats">统计</span>
                     </button>
-                </nav>
-                <div class="filters">
-                    <div class="filter-dropdown">
-                        <select id="siteFilter" class="filter-select" aria-label="Filter by Site (Multiple)" multiple>
+                    </nav>
+                </div>
+                <div class="header-actions">
+                    <div class="lang-switcher">
+                        <svg class="lang-switcher-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <select id="languageSelect" class="lang-select" data-i18n-aria-label="lang_switcher_aria" aria-label="Language">
+                            <option value="zh">中文</option>
+                            <option value="en">English</option>
+                            <option value="ja">日本語</option>
                         </select>
                     </div>
-                    <div class="filter-dropdown">
-                        <select id="cloudProviderFilter" class="filter-select" aria-label="Filter by Cloud Provider (Multiple)" multiple>
-                        </select>
-                    </div>
-                    <div class="filter-dropdown">
-                        <select id="channelFilter" class="filter-select" aria-label="Filter by Channel (Multiple)" multiple>
-                        </select>
-                    </div>
-                    <div class="filter-dropdown">
-                        <select id="regionFilter" class="filter-select" aria-label="Filter by Region (Multiple)" multiple>
-                        </select>
-                    </div>
-                    <button id="resetFiltersBtn" type="button" class="filter-reset-btn" data-i18n="filters_reset">重置筛选</button>
+                    <button type="button" id="changelog-open-btn" class="header-icon-btn" data-i18n-title="changelog_open_title" data-i18n-aria-label="changelog_open_title" aria-haspopup="dialog" aria-controls="changelog-modal" aria-expanded="false">
+                        <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                            <path d="M12 7v5l4 2"/>
+                        </svg>
+                    </button>
+                    <a href="https://github.com/yizhouxw/obcloud-globe" target="_blank" class="github-link" rel="noopener noreferrer" aria-label="View on GitHub">
+                        <svg aria-hidden="true" viewBox="0 0 16 16" class="octicon octicon-mark-github">
+                            <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.46-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z" fill="currentColor"></path>
+                        </svg>
+                    </a>
                 </div>
             </div>
-            <div id="filter-summary" class="filter-summary" data-i18n="filter_summary_all">当前筛选：全部</div>
+            <div class="header-filter-row">
+                <div class="filter-inline">
+                    <button type="button" id="filters-toggle-btn" class="filters-toggle-btn" aria-expanded="false" aria-controls="filter-panel" data-i18n-title="filters_toggle_hint" data-i18n-aria-label="filters_toggle_hint">
+                        <svg class="filters-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        <span data-i18n="filters_toggle">筛选</span>
+                        <span id="filter-active-badge" class="filter-active-badge hidden" aria-hidden="true"></span>
+                    </button>
+                    <div id="filter-summary" class="filter-summary filter-summary--inline" data-i18n="filter_summary_all">当前筛选：全部</div>
+                </div>
+                <div id="filter-panel" class="filter-panel" role="region" aria-label="Filters" hidden>
+                    <p class="filter-panel-hint" data-i18n="filters_panel_hint">可多选，输入关键字可搜索；不选表示该维度不限制。</p>
+                    <div class="filter-panel-grid">
+                        <div class="filter-field">
+                            <label class="filter-field-label" for="siteFilter" data-i18n="filter_label_site">站点</label>
+                            <div class="filter-dropdown">
+                                <select id="siteFilter" class="filter-ts" data-filter-ts="site" aria-label="Filter by Site (Multiple)" multiple></select>
+                            </div>
+                        </div>
+                        <div class="filter-field">
+                            <label class="filter-field-label" for="cloudProviderFilter" data-i18n="filter_label_provider">云厂商</label>
+                            <div class="filter-dropdown">
+                                <select id="cloudProviderFilter" class="filter-ts" data-filter-ts="provider" aria-label="Filter by Cloud Provider (Multiple)" multiple></select>
+                            </div>
+                        </div>
+                        <div class="filter-field">
+                            <label class="filter-field-label" for="channelFilter" data-i18n="filter_label_channel">渠道</label>
+                            <div class="filter-dropdown">
+                                <select id="channelFilter" class="filter-ts" data-filter-ts="channel" aria-label="Filter by Channel (Multiple)" multiple></select>
+                            </div>
+                        </div>
+                        <div class="filter-field">
+                            <label class="filter-field-label" for="regionFilter" data-i18n="filter_label_region">地域</label>
+                            <div class="filter-dropdown">
+                                <select id="regionFilter" class="filter-ts" data-filter-ts="region" aria-label="Filter by Region (Multiple)" multiple></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-panel-actions filter-panel-actions--split">
+                        <button id="resetFiltersBtn" type="button" class="filter-reset-btn filter-reset-btn--panel" data-i18n="filters_reset">重置筛选</button>
+                        <button id="filter-panel-done-btn" type="button" class="filter-done-btn" data-i18n="filters_done">完成</button>
+                    </div>
+                </div>
+            </div>
         </header>
 
         <main>
@@ -159,13 +194,15 @@
                         </div>
 
                         <div class="stats-toolbar">
-                            <label for="statsDimension" data-i18n="stats_dimension_label">统计维度</label>
-                            <select id="statsDimension" class="filter-select">
-                                <option value="site" data-i18n="stats_dimension_site">Site</option>
-                                <option value="provider" data-i18n="stats_dimension_provider">Cloud Provider</option>
-                                <option value="country" data-i18n="stats_dimension_country">Country</option>
-                                <option value="channel" data-i18n="stats_dimension_channel">Channel</option>
-                            </select>
+                            <div class="stats-dimension-control">
+                                <label for="statsDimension" data-i18n="stats_dimension_label">统计维度</label>
+                                <select id="statsDimension" class="filter-select filter-select--on-light stats-dimension-select">
+                                    <option value="site" data-i18n="stats_dimension_site">Site</option>
+                                    <option value="provider" data-i18n="stats_dimension_provider">Cloud Provider</option>
+                                    <option value="country" data-i18n="stats_dimension_country">Country</option>
+                                    <option value="channel" data-i18n="stats_dimension_channel">Channel</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="stats-summary" id="stats-summary"></div>
@@ -247,8 +284,9 @@
         </main>
     </div>
 
-    <script src="src/translations.js?v=4"></script>
-    <script src="src/app.js?v=4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" crossorigin="anonymous"></script>
+    <script src="src/translations.js?v=8"></script>
+    <script src="src/app.js?v=10"></script>
 </body>
 </html>
 
