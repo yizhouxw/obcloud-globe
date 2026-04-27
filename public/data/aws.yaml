@@ -219,5 +219,8 @@ regions:
   - ap-southeast-7-a
   - ap-southeast-7-b
   - ap-southeast-7-c
+  channels:
+  - 国际站-自运营
+  - 国际站-云市场
   latitude: 13.7563
   longitude: 100.5018

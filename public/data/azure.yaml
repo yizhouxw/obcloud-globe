@@ -36,6 +36,8 @@ regions:
   - koreacentral-1
   - koreacentral-2
   - koreacentral-3
+  channels:
+  - 国际站-云市场
   latitude: 37.5665
   longitude: 126.978
 - cloud_provider: Azure
@@ -48,5 +50,7 @@ regions:
   - malaysiawest-1
   - malaysiawest-2
   - malaysiawest-3
+  channels:
+  - 国际站-云市场
   latitude: 3.139
   longitude: 101.6869

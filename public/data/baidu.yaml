@@ -11,6 +11,7 @@ regions:
   - cn-bd-d
   channels:
   - 中国站-官网渠道
+  - 百度云官网渠道
   latitude: 38.851
   longitude: 115.49
 - cloud_provider: 百度云
@@ -26,6 +27,7 @@ regions:
   - cn-bj-i
   channels:
   - 中国站-官网渠道
+  - 百度云官网渠道
   latitude: 39.9042
   longitude: 116.4074
 - cloud_provider: 百度云
@@ -39,5 +41,6 @@ regions:
   - cn-fwh-b
   channels:
   - 中国站-官网渠道
+  - 百度云官网渠道
   latitude: 30.5928
   longitude: 114.3055

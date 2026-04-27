@@ -113,6 +113,9 @@ const CHANNEL_URLS = {
     '中国站-腾讯云-自运营': 'https://console-cn.oceanbase.com',
 };
 
+const CHANNEL_SUFFIX_PRIORITY = ['云市场', '官网渠道', '自运营', '精选商城', '联营联运'];
+const CHANNEL_URL_KEYS = Object.keys(CHANNEL_URLS);
+
 // Get cloud provider color configuration
 function getCloudProviderConfig(provider) {
     return CLOUD_PROVIDER_COLORS[provider] || {
@@ -1012,9 +1015,8 @@ function getStatsDimensionValues(region, dimension) {
         return [getRegionCountry(region.region)];
     }
     if (dimension === 'channel') {
-        return (Array.isArray(region.channels) && region.channels.length > 0)
-            ? region.channels
-            : [t('stats_unknown')];
+        const channels = getRegionChannels(region);
+        return channels.length > 0 ? channels : [t('stats_unknown')];
     }
     return [];
 }
@@ -1201,6 +1203,61 @@ function getSelectedValues(selectId) {
         .filter(v => v != null && String(v).length > 0);
 }
 
+function sortChannelSuffixes(suffixes) {
+    return [...suffixes].sort((a, b) => {
+        const idxA = CHANNEL_SUFFIX_PRIORITY.indexOf(a);
+        const idxB = CHANNEL_SUFFIX_PRIORITY.indexOf(b);
+        const rankA = idxA === -1 ? Number.MAX_SAFE_INTEGER : idxA;
+        const rankB = idxB === -1 ? Number.MAX_SAFE_INTEGER : idxB;
+        if (rankA !== rankB) return rankA - rankB;
+        return a.localeCompare(b, currentLang === 'zh' ? 'zh-CN' : currentLang);
+    });
+}
+
+function getDefaultChannelsByRegion(region) {
+    if (!region || !region.cloud_provider) return [];
+
+    const provider = region.cloud_provider;
+    const sites = getObcloudSites(region);
+    if (sites.length === 0) return [];
+
+    const resolved = [];
+    const seen = new Set();
+
+    sites.forEach(site => {
+        const prefix = `${site}-${provider}-`;
+        const suffixes = CHANNEL_URL_KEYS
+            .filter(key => key.startsWith(prefix))
+            .map(key => key.slice(prefix.length))
+            .filter(suffix => suffix && !suffix.includes('金融'));
+
+        sortChannelSuffixes(new Set(suffixes)).forEach(suffix => {
+            const channel = `${site}-${suffix}`;
+            if (seen.has(channel)) return;
+            seen.add(channel);
+            resolved.push(channel);
+        });
+    });
+
+    // Azure 默认兜底：国际站渠道按 Azure Marketplace 展示。
+    if (resolved.length === 0 && provider === 'Azure' && sites.includes('国际站')) {
+        return ['国际站-云市场'];
+    }
+
+    return resolved;
+}
+
+function getRegionChannels(region) {
+    if (!region) return [];
+    const explicitChannels = Array.isArray(region.channels)
+        ? region.channels.filter(channel => typeof channel === 'string' && channel.trim().length > 0)
+        : [];
+    if (explicitChannels.length > 0) {
+        return explicitChannels;
+    }
+    return getDefaultChannelsByRegion(region);
+}
+
 // Initialize filter dropdowns
 function initializeFilters() {
     destroyFilterTomSelects();
@@ -1258,9 +1315,7 @@ function initializeFilters() {
     // Get all unique channels from all regions
     const allChannels = new Set();
     regionsData.forEach(region => {
-        if (region.channels && Array.isArray(region.channels)) {
-            region.channels.forEach(channel => allChannels.add(channel));
-        }
+        getRegionChannels(region).forEach(channel => allChannels.add(channel));
     });
     const channels = [...allChannels].sort();
 
@@ -1335,8 +1390,9 @@ function applyFilters() {
         const matchProvider = cloudProviderFilters.length === 0 || cloudProviderFilters.includes(region.cloud_provider);
 
         // Match channel (check if region has the selected channel)
+        const regionChannels = getRegionChannels(region);
         const matchChannel = channelFilters.length === 0 ||
-            (region.channels && Array.isArray(region.channels) && channelFilters.some(channel => region.channels.includes(channel)));
+            channelFilters.some(channel => regionChannels.includes(channel));
 
         // Match region by selected region items
         const matchRegion = regionFilters.length === 0 || regionFilters.includes(region.region);
@@ -1881,7 +1937,7 @@ function updateTable() {
             }
         });
 
-        const channels = Array.isArray(region.channels) ? region.channels : [];
+        const channels = getRegionChannels(region);
         const channelsHtml = channels.map(ch => getChannelHtml(ch, region)).join('');
 
         const sites = getObcloudSites(region);
@@ -1905,7 +1961,7 @@ function updateTable() {
             <td>${azCount}</td>
             <td>${azList}</td>
             <td>${launchDate}</td>
-            <td><div class="channels">${channelsHtml}</div></td>
+            <td>${channels.length > 0 ? `<div class="channels">${channelsHtml}</div>` : '-'}</td>
             <td>${sites.length > 0 ? `<div class="channels">${sitesHtml}</div>` : '-'}</td>
         `;
 
@@ -1979,7 +2035,8 @@ function showRegionInfo(region) {
     const providerConfig = getCloudProviderConfig(region.cloud_provider);
     const providerColorHex = '#' + providerConfig.color.toString(16).padStart(6, '0');
 
-    const channelsHtml = region.channels.map(ch => getChannelHtml(ch, region)).join('');
+    const channels = getRegionChannels(region);
+    const channelsHtml = channels.map(ch => getChannelHtml(ch, region)).join('');
 
     const sites = getObcloudSites(region);
     const sitesHtml = sites.length > 0
@@ -2016,7 +2073,7 @@ function showRegionInfo(region) {
         <div class="info-item">
             <label>${t('label_channels')}</label>
             <div class="value">
-                <div class="channels">${channelsHtml}</div>
+                ${channels.length > 0 ? `<div class="channels">${channelsHtml}</div>` : '-'}
             </div>
         </div>
         <div class="info-item">
