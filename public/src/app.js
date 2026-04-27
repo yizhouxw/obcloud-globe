@@ -115,6 +115,10 @@ const CHANNEL_URLS = {
 
 const CHANNEL_SUFFIX_PRIORITY = ['云市场', '官网渠道', '自运营', '精选商城', '联营联运'];
 const CHANNEL_URL_KEYS = Object.keys(CHANNEL_URLS);
+const CHANNEL_NAME_ALIASES = {
+    // Legacy / provider-specific channel labels from data feeds
+    '百度云官网渠道': '中国站-官网渠道'
+};
 
 // Get cloud provider color configuration
 function getCloudProviderConfig(provider) {
@@ -947,9 +951,11 @@ function handleResponsiveSidebar() {
 
 // Helper to generate channel HTML (link or text)
 function getChannelHtml(channelName, region) {
+    const normalizedChannelName = CHANNEL_NAME_ALIASES[channelName] || channelName;
+
     // Construct key: site-cloudProvider-channelName
     // channelName format is assumed to be Site-ChannelSuffix (e.g. 中国站-官网渠道)
-    const parts = channelName.split('-');
+    const parts = normalizedChannelName.split('-');
     const site = parts[0];
     const suffix = parts.slice(1).join('-');
 
