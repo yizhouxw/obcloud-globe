@@ -120,6 +120,13 @@ const CHANNEL_NAME_ALIASES = {
     '百度云官网渠道': '中国站-官网渠道'
 };
 
+function normalizeChannelName(channelName) {
+    if (typeof channelName !== 'string') return '';
+    const trimmed = channelName.trim();
+    if (!trimmed) return '';
+    return CHANNEL_NAME_ALIASES[trimmed] || trimmed;
+}
+
 // Get cloud provider color configuration
 function getCloudProviderConfig(provider) {
     return CLOUD_PROVIDER_COLORS[provider] || {
@@ -951,7 +958,7 @@ function handleResponsiveSidebar() {
 
 // Helper to generate channel HTML (link or text)
 function getChannelHtml(channelName, region) {
-    const normalizedChannelName = CHANNEL_NAME_ALIASES[channelName] || channelName;
+    const normalizedChannelName = normalizeChannelName(channelName);
 
     // Construct key: site-cloudProvider-channelName
     // channelName format is assumed to be Site-ChannelSuffix (e.g. 中国站-官网渠道)
@@ -1256,10 +1263,12 @@ function getDefaultChannelsByRegion(region) {
 function getRegionChannels(region) {
     if (!region) return [];
     const explicitChannels = Array.isArray(region.channels)
-        ? region.channels.filter(channel => typeof channel === 'string' && channel.trim().length > 0)
+        ? region.channels
+            .map(normalizeChannelName)
+            .filter(Boolean)
         : [];
     if (explicitChannels.length > 0) {
-        return explicitChannels;
+        return [...new Set(explicitChannels)];
     }
     return getDefaultChannelsByRegion(region);
 }
