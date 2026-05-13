@@ -591,7 +591,7 @@ function parseChangelogEvents(markdownText) {
     let currentDate = '';
     let inCodeBlock = false;
     const datePattern = /^##\s+(\d{4}-\d{2}-\d{2})\s*$/;
-    const eventPattern = /^- \[(地域上线|地域变更|地域新增可用区)\]\s+(.+)$/;
+    const eventPattern = /^- \[(地域上线|地域增加渠道|地域变更|地域新增可用区)\]\s+(.+)$/;
 
     lines.forEach(line => {
         if (line.trim().startsWith('```')) {
@@ -1508,7 +1508,7 @@ function updateChangelogView() {
             const typeLabel = t(event.type);
             const providerLabel = t(event.provider);
             const regionLabel = t(event.region);
-            const detailText = (event.type === '地域上线' && event.launchDate)
+            const detailText = (event.type === '地域上线' || event.type === '地域增加渠道') && event.launchDate
                 ? `${event.detail} | ${event.launchDate}`
                 : event.detail;
             const text = `${typeLabel} | ${providerLabel} | ${regionLabel} | ${detailText}`;

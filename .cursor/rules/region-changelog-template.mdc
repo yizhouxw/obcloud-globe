@@ -12,13 +12,16 @@ When updating `CHANGELOG.md` for region data changes, use this app-friendly form
 
 ### 简化事件（用于 App 展示）
 - [地域上线] <云厂商> | <地域> | <region_code> | <上线日期 YYYY-MM-DD>
+- [地域增加渠道] <云厂商> | <地域> | <region_code> | <站点/渠道覆盖说明>
 - [地域变更] <云厂商> | <地域> | <说明>
 - [地域新增可用区] <云厂商> | <地域> | <新增 AZ 列表>
 ```
 
 Guidelines:
 - Keep one entry per change batch/date.
-- Simplified event types: `地域上线`, `地域变更`, `地域新增可用区`. **AZ changes (add/remove/correct mappings) are 地域变更, not 地域下线.** Do **not** use `[地域下线]`.
-- `地域新增可用区` is only for newly listed AZs; use `地域变更` for AZ removals, corrections, channel/site wording, coordinates, etc.
+- Simplified event types: `地域上线`, `地域增加渠道`, `地域变更`, `地域新增可用区`. **AZ changes (add/remove/correct mappings) are 地域变更, not 地域下线.** Do **not** use `[地域下线]`.
+- `地域新增可用区` is only for newly listed AZs.
+- `地域增加渠道` is for an **existing** region that **gains** new site/channel coverage (not a typo fix); use `地域变更` or **数据修正** for wrong/missing field cleanups if the story is corrective rather than “new coverage”.
+- Use `地域变更` for AZ removals/corrections, coordinates, and other region-field deltas that are not purely “channels expanded”.
 - Use a **数据修正** subsection for lengthy technical notes alongside simplified lines when helpful.
-- Keep each event line in one unified format: `[类型] 厂商 | 地域 | 详情` (fourth field launch date required only for `地域上线`).
+- Fourth pipe field: launch date (`地域上线`); coverage note (`地域增加渠道`).

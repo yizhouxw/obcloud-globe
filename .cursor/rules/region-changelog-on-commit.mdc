@@ -21,10 +21,11 @@ When preparing a git commit, if region data changes are included, update `CHANGE
 2. If yes, add a dated entry to `CHANGELOG.md` with simplified event lines.
 3. Use only these event types in simplified events:
    - `地域上线`
-   - `地域变更` (region-field updates—including AZ removals/correction, channels, sites; **not** "region offline")
+   - `地域增加渠道` (existing region gains new site/channel coverage—not the same as a corrective “补齐字段”; see template rule)
+   - `地域变更` (AZ removals/correction, coordinates, etc.—**not** "region offline")
    - `地域新增可用区` (net-new AZ listing only)
    - Do **not** add `[地域下线]` lines (ambiguous vs real decommissioning); use **数据修正** for long-form notes when needed.
-4. For `地域上线`, include launch date in event line (`厂商 | 地域 | region_code | launch_date`).
+4. For `地域上线`, include launch date as the fourth field (`厂商 | 地域 | region_code | launch_date`). For `地域增加渠道`, fourth field is the site/channel coverage summary.
 5. Follow the standard changelog template defined in project rules.
 6. Keep `CHANGELOG.md` and `public/CHANGELOG.md` in sync.
 7. Keep entries concise and factual; do not invent unknown details.
