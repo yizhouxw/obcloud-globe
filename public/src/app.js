@@ -1503,7 +1503,13 @@ function updateChangelogView() {
         groupedByDate.get(dateKey).push(event);
     });
 
-    const sectionsHtml = Array.from(groupedByDate.entries()).map(([date, events]) => {
+    const sortedEntries = Array.from(groupedByDate.entries()).sort(([a], [b]) => {
+        if (a === '-' && b !== '-') return 1;
+        if (b === '-' && a !== '-') return -1;
+        return b.localeCompare(a);
+    });
+
+    const sectionsHtml = sortedEntries.map(([date, events]) => {
         const itemsHtml = events.map(event => {
             const typeLabel = t(event.type);
             const providerLabel = t(event.provider);
