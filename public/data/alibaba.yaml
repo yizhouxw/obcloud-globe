@@ -310,6 +310,7 @@ regions:
   region_code: us-east-1
   obcloud_sites:
   - 中国站
+  - 国际站
   region: 美国-弗吉尼亚
   launch_date: '2025-05-28'
   availability_zones:
@@ -319,6 +320,7 @@ regions:
   - 中国站-官网渠道
   - 中国站-精选商城
   - 国际站-官网渠道
+  - 国际站-云市场
   latitude: 38.9072
   longitude: -77.0369
 - cloud_provider: 阿里云
