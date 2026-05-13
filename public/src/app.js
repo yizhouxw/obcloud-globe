@@ -591,7 +591,7 @@ function parseChangelogEvents(markdownText) {
     let currentDate = '';
     let inCodeBlock = false;
     const datePattern = /^##\s+(\d{4}-\d{2}-\d{2})\s*$/;
-    const eventPattern = /^- \[(地域上线|地域下线|地域新增可用区)\]\s+(.+)$/;
+    const eventPattern = /^- \[(地域上线|地域变更|地域新增可用区)\]\s+(.+)$/;
 
     lines.forEach(line => {
         if (line.trim().startsWith('```')) {
